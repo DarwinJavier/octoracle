@@ -59,12 +59,19 @@ describe("football-data.org fixture normalization", () => {
   });
 
   it("requests only the fixed World Cup endpoint with header authentication", async () => {
-    const requests: Array<{ headers: Headers; url: URL }> = [];
+    const requests: Array<{
+      cache: RequestCache | undefined;
+      headers: Headers;
+      next: RequestInit["next"];
+      url: URL;
+    }> = [];
     const provider = new FootballDataFixtureProvider({
       apiKey: "test-key",
       fetchImplementation: async (input, init) => {
         requests.push({
+          cache: init?.cache,
           headers: new Headers(init?.headers),
+          next: init?.next,
           url: new URL(input.toString()),
         });
         return Response.json({ matches: [] });
@@ -78,6 +85,8 @@ describe("football-data.org fixture normalization", () => {
       "https://api.football-data.org/v4/competitions/WC/matches?season=2026&dateFrom=2026-06-11&dateTo=2026-07-20",
     );
     expect(requests[0].headers.get("X-Auth-Token")).toBe("test-key");
+    expect(requests[0].cache).toBe("force-cache");
+    expect(requests[0].next?.revalidate).toBe(60);
   });
 
   it("requests only a validated team-history endpoint for completed matches", async () => {

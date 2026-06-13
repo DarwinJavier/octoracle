@@ -197,7 +197,8 @@ export class FootballDataFixtureProvider implements FixtureProvider {
         "X-Auth-Token": this.options.apiKey,
       },
       signal: AbortSignal.timeout(this.timeoutMs),
-      cache: "no-store",
+      cache: "force-cache",
+      next: { revalidate: 60 },
     });
     if (!response.ok) {
       throw new Error(
@@ -230,7 +231,8 @@ export class FootballDataFixtureProvider implements FixtureProvider {
         "X-Auth-Token": this.options.apiKey,
       },
       signal: AbortSignal.timeout(this.timeoutMs),
-      cache: "no-store",
+      cache: "force-cache",
+      next: { revalidate: 21_600 },
     });
     if (!response.ok) {
       throw new Error(

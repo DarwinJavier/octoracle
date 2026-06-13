@@ -31,6 +31,7 @@ export function DailyMatchSelector({
             className="daily-match-link"
             href={`/?match=${encodeURIComponent(match.id)}`}
             key={match.id}
+            prefetch={false}
           >
             <strong>
               {match.teamA.shortName} vs {match.teamB.shortName}
