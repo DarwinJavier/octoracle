@@ -26,6 +26,22 @@ describe("deterministic baseline prediction engine", () => {
     expect(prediction.predictedAdvancingTeamId).toBeNull();
   });
 
+  it("does not make draw the default outcome for every moderate rating gap", () => {
+    const moderateGap = predictionInput({
+      teamB: {
+        ...predictionInput().teamA,
+        longTermStrength: 0.58,
+        recentForm: 0.6,
+      },
+    });
+    const prediction = buildPrediction(moderateGap);
+
+    expect(prediction.selectedOutcome).toBe("team_a");
+    expect(prediction.drawProbability).toBeLessThan(
+      prediction.teamAWinProbability,
+    );
+  });
+
   it("selects a winner when validated ratings have a meaningful gap", () => {
     const closeButDistinct = predictionInput({
       teamB: {
@@ -53,7 +69,7 @@ describe("deterministic baseline prediction engine", () => {
       },
     });
     const prediction = buildPrediction(input);
-    expect(prediction.selectedOutcome).toBe("draw");
+    expect(prediction.selectedOutcome).toBe("team_a");
     expect(prediction.predictedAdvancingTeamId).toBe(
       "00000000-0000-4000-8000-00000000000a",
     );

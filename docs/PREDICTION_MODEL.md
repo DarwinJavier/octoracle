@@ -11,7 +11,7 @@
 - No prediction is generated or refreshed after kickoff.
 - Frozen predictions are immutable; corrections create auditable versions or void incompatible predictions.
 
-## Baseline Version 1.1.0
+## Baseline Version 1.2.0
 
 The deterministic development baseline accepts symmetric, validated values from `0` to `1` for both teams. It uses these version-controlled weights:
 
@@ -23,7 +23,7 @@ The deterministic development baseline accepts symmetric, validated values from 
 15% validated public-source consensus
 ```
 
-The engine calculates a weighted advantage, converts team A, draw, and team B logits through softmax, and normalizes the result to exactly one within floating-point tolerance. Draw affinity rises only when the teams' weighted ratings are genuinely close; a meaningful validated rating gap must favor a team outcome.
+The engine calculates a weighted advantage and converts it into expected goals for each team. Team A win, draw, and Team B win probabilities are summed directly from the independent Poisson score distribution and normalized to exactly one within floating-point tolerance. This prevents a standalone draw preference from overwhelming moderate team-strength differences.
 
 Expected goals are derived from validated attacking performance and the weighted advantage. An independent Poisson score search selects the most likely 90-minute score that is compatible with the selected outcome. Knockout matches store the 90-minute outcome separately from the team predicted to advance.
 
@@ -33,7 +33,8 @@ The baseline is intentionally transparent and requires calibration against histo
 
 - The input snapshot, weights, and algorithm version produce a SHA-256 `input_snapshot_hash`.
 - Live historical inputs use up to 20 completed matches from a bounded two-year provider window. Recent form, attack, and defense use the most recent eight available matches.
-- At least three completed provider matches per team are required for a live provider-preview prediction. When either team lacks that minimum, the prediction remains not ready rather than converting missing evidence into a draw.
+- A live provider-preview prediction requires either at least three completed provider matches or an official FIFA ranking record for each team. FIFA ranking points supply long-term strength and ranking-point movement supplies a bounded recent-form signal. Available match history continues to supply recent results, attack, and defense.
+- When either team lacks both sufficient history and an official FIFA ranking, the prediction remains not ready rather than converting missing evidence into a draw.
 - Missing squad evidence or sufficient consensus produces an explicit neutral `0.5` signal.
 - `prediction_signal_snapshots` stores both teams' normalized signals and exact contributing provider match IDs before prediction publication.
 - The match ID and snapshot produce a deterministic `animation_seed`.

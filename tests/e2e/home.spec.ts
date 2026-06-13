@@ -18,9 +18,8 @@ test("shows and reveals the static match experience", async ({
   await expect(page.getByText(/performance cannot change/i)).toHaveCount(0);
 
   await page.getByRole("button", { name: "Ask the Octopus" }).click();
-  await expect(page.getByText("Predicted result")).toBeVisible({
-    timeout: 15_000,
-  });
+  await page.getByRole("button", { name: "Skip animation" }).click();
+  await expect(page.getByText("Predicted result")).toBeVisible();
   await expect(page.getByText("Mexico 2–1 South Africa")).toBeVisible();
   await expect(
     page.getByRole("heading", { name: "Mexico wins!" }),

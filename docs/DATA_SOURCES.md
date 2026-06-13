@@ -20,7 +20,9 @@ The provider preview may list all validated fixtures sharing the selected match'
 
 football-data.org currently omits the venue and city for some World Cup fixtures. A small provider-ID keyed fallback may fill those fields only after human verification against the published tournament schedule. Canada vs Bosnia-Herzegovina (`537333`) is verified as Toronto Stadium, Toronto. Provider-supplied locations always take precedence.
 
-The free subscription may return sparse team history for some national teams. Missing history is represented by neutral `0.5` signals and is never fabricated. Every prediction signal snapshot records the exact provider match IDs that contributed.
+The free subscription may return sparse team history for some national teams. For the provider-preview MVP, the server supplements sparse history with FIFA's official public men's ranking feed at the fixed `https://api.fifa.com/api/v3/rankings?locale=en&gender=1` endpoint. The response is strictly validated, cached for six hours, and used only for long-term strength and recent ranking-point movement. No arbitrary FIFA URLs are accepted.
+
+When both teams have official FIFA ranking records, those rankings provide one source-backed input. Available match history still supplies recent results, attacking performance, and defensive performance. When neither sufficient history nor a ranking record exists for either team, the prediction remains not ready. Every stored prediction signal snapshot records the exact provider match IDs that contributed.
 
 Completed fixtures preserve separate score concepts:
 

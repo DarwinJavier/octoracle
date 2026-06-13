@@ -118,7 +118,7 @@ GET /api/matches/:matchId/prediction
 - Public routes expose no write methods and validate every response.
 - Supabase service-role credentials remain server-side behind the repository boundary.
 - Responses explicitly distinguish `upcoming`, `in_progress`, `finished`, `not_ready`, `stale`, `tournament_complete`, and `provider_error`.
-- When stored Supabase fixtures are unavailable but `FOOTBALL_DATA_API_KEY` is configured, the homepage shows a clearly labeled live-provider preview. It builds a deterministic, non-persisted prediction from available validated team history and never generates one after kickoff.
+- When stored Supabase fixtures are unavailable but `FOOTBALL_DATA_API_KEY` is configured, the homepage shows a clearly labeled live-provider preview. It builds a deterministic, non-persisted prediction from available validated team history and FIFA's strictly validated official men's ranking feed, and never generates one after kickoff.
 - The homepage lists every fixture on the selected match's Eastern-time calendar day. Selecting a fixture with `?match=<provider-id>` updates the match card, aquarium, and deterministic preview.
 - The “Previous results” link jumps to the frozen-prediction accuracy record. Comparisons appear only when a real frozen prediction and completed result both exist.
 - MVP provider-preview predictions that were actually revealed are preserved in an immutable version-controlled preview ledger until the Supabase prediction lifecycle is available. Canada vs Bosnia-Herzegovina and USA vs Paraguay are the first recorded previews; finished ledger entries are merged into accuracy history without replacing stored production records.

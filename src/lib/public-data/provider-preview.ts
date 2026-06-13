@@ -5,6 +5,10 @@ import { resolveFeaturedMatch } from "@/lib/fixtures/resolver";
 import type { NormalizedFixture } from "@/lib/fixtures/types";
 import { buildPrediction } from "@/lib/prediction/engine";
 import { MIN_HISTORY_MATCHES } from "@/lib/prediction/config";
+import {
+  applyFifaRankingSignal,
+  FifaRankingProvider,
+} from "@/lib/prediction/signals/fifa-ranking";
 import { calculateHistorySignals } from "@/lib/prediction/signals/history";
 import {
   recordedPreviewPredictionFor,
@@ -21,7 +25,7 @@ import {
 import { publicStateFor, toPublicMatch } from "./service";
 
 const PREVIEW_WARNING =
-  "Live fixture preview from football-data.org. This deterministic prediction is not stored or frozen yet.";
+  "Live fixture preview using football-data.org and FIFA's official men's rankings. This deterministic prediction is not stored or frozen yet.";
 
 function stableUuid(value: string) {
   const hash = createHash("sha256").update(value).digest("hex").slice(0, 32);
@@ -64,13 +68,18 @@ async function previewPrediction(
     return null;
   }
 
-  const [teamAHistory, teamBHistory] = await Promise.all([
+  const [teamAHistory, teamBHistory, rankings] = await Promise.all([
     historyOrEmpty(provider, fixture.teamA.providerId, fixture.kickoffAtUtc),
     historyOrEmpty(provider, fixture.teamB.providerId, fixture.kickoffAtUtc),
+    new FifaRankingProvider().fetchRankings().catch(() => new Map()),
   ]);
+  const teamARanking = rankings.get(fixture.teamA.fifaCode ?? "");
+  const teamBRanking = rankings.get(fixture.teamB.fifaCode ?? "");
+  const teamAHasHistory = teamAHistory.length >= MIN_HISTORY_MATCHES;
+  const teamBHasHistory = teamBHistory.length >= MIN_HISTORY_MATCHES;
   if (
-    teamAHistory.length < MIN_HISTORY_MATCHES ||
-    teamBHistory.length < MIN_HISTORY_MATCHES
+    (!teamARanking && !teamAHasHistory) ||
+    (!teamBRanking && !teamBHasHistory)
   ) {
     return null;
   }
@@ -83,9 +92,21 @@ async function previewPrediction(
     teamAName: fixture.teamA.name,
     teamBId,
     teamBName: fixture.teamB.name,
-    teamA: calculateHistorySignals(fixture.teamA.providerId, teamAHistory),
-    teamB: calculateHistorySignals(fixture.teamB.providerId, teamBHistory),
-    sourceCount: 0,
+    teamA: teamARanking
+      ? applyFifaRankingSignal(
+          calculateHistorySignals(fixture.teamA.providerId, teamAHistory),
+          teamARanking,
+          teamAHasHistory,
+        )
+      : calculateHistorySignals(fixture.teamA.providerId, teamAHistory),
+    teamB: teamBRanking
+      ? applyFifaRankingSignal(
+          calculateHistorySignals(fixture.teamB.providerId, teamBHistory),
+          teamBRanking,
+          teamBHasHistory,
+        )
+      : calculateHistorySignals(fixture.teamB.providerId, teamBHistory),
+    sourceCount: teamARanking && teamBRanking ? 1 : 0,
     kickoffAtUtc: fixture.kickoffAtUtc,
   };
   const prediction = buildPrediction(input);

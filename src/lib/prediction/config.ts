@@ -1,4 +1,4 @@
-export const ALGORITHM_VERSION = "baseline-1.1.0";
+export const ALGORITHM_VERSION = "baseline-1.2.0";
 export const MODEL_VERSION = "deterministic-baseline";
 
 export const PREDICTION_WEIGHTS = {

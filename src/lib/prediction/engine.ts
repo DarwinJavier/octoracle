@@ -48,16 +48,33 @@ function rating(signals: PredictionInput["teamA"]) {
   );
 }
 
-function softmax(values: number[]) {
-  const exponentials = values.map((value) => Math.exp(value));
-  const total = exponentials.reduce((sum, value) => sum + value, 0);
-  return exponentials.map((value) => value / total);
-}
-
 function poisson(goals: number, expectedGoals: number) {
   let factorial = 1;
   for (let value = 2; value <= goals; value += 1) factorial *= value;
   return (Math.exp(-expectedGoals) * expectedGoals ** goals) / factorial;
+}
+
+function outcomeProbabilities(expectedA: number, expectedB: number) {
+  const probabilities = { team_a: 0, draw: 0, team_b: 0 };
+  for (let teamA = 0; teamA <= MAX_GOALS; teamA += 1) {
+    for (let teamB = 0; teamB <= MAX_GOALS; teamB += 1) {
+      probabilities[outcomeForScore(teamA, teamB)] +=
+        poisson(teamA, expectedA) * poisson(teamB, expectedB);
+    }
+  }
+  const total =
+    probabilities.team_a + probabilities.draw + probabilities.team_b;
+  return [
+    round(probabilities.team_a / total),
+    round(probabilities.draw / total),
+    round(probabilities.team_b / total),
+  ];
+}
+
+function selectOutcome(probabilities: number[]): SelectedOutcome {
+  const [teamA, draw, teamB] = probabilities;
+  if (Math.abs(teamA - teamB) <= 0.00001 && draw >= 0.2) return "draw";
+  return teamA > teamB ? "team_a" : "team_b";
 }
 
 function outcomeForScore(teamA: number, teamB: number): SelectedOutcome {
@@ -134,28 +151,9 @@ export function buildPrediction(rawInput: PredictionInput): BuiltPrediction {
   const teamARating = rating(input.teamA);
   const teamBRating = rating(input.teamB);
   const advantage = teamARating - teamBRating;
-  const drawAffinity = 0.25 - Math.min(Math.abs(advantage) * 2, 0.75);
-  const [teamAWinProbability, drawProbability, teamBWinProbability] = softmax([
-    advantage * 6,
-    drawAffinity,
-    -advantage * 6,
-  ]).map((value) => round(value));
-  const normalization =
-    teamAWinProbability + drawProbability + teamBWinProbability;
-  const probabilities = [
-    round(teamAWinProbability / normalization),
-    round(drawProbability / normalization),
-    round(teamBWinProbability / normalization),
-  ];
-  probabilities[2] = round(1 - probabilities[0] - probabilities[1]);
-
-  const outcomeCandidates: SelectedOutcome[] = ["team_a", "draw", "team_b"];
-  const selectedOutcome = outcomeCandidates[
-    probabilities.indexOf(Math.max(...probabilities))
-  ] as SelectedOutcome;
   const expectedGoalsA = round(
     clamp(
-      0.65 + input.teamA.attackingPerformance * 1.35 + advantage * 0.8,
+      0.55 + input.teamA.attackingPerformance * 1.5 + advantage * 2.25,
       0.1,
       4,
     ),
@@ -163,12 +161,15 @@ export function buildPrediction(rawInput: PredictionInput): BuiltPrediction {
   );
   const expectedGoalsB = round(
     clamp(
-      0.65 + input.teamB.attackingPerformance * 1.35 - advantage * 0.8,
+      0.55 + input.teamB.attackingPerformance * 1.5 - advantage * 2.25,
       0.1,
       4,
     ),
     3,
   );
+  const probabilities = outcomeProbabilities(expectedGoalsA, expectedGoalsB);
+  probabilities[2] = round(1 - probabilities[0] - probabilities[1]);
+  const selectedOutcome = selectOutcome(probabilities);
   const score = mostLikelyScore(
     expectedGoalsA,
     expectedGoalsB,

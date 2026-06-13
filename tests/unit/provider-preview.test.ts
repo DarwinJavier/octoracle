@@ -24,6 +24,27 @@ function completedHistory() {
   }));
 }
 
+function fifaRankings() {
+  return {
+    Results: [
+      {
+        IdCountry: "MEX",
+        Rank: 15,
+        DecimalTotalPoints: 1650,
+        DecimalPrevPoints: 1645,
+        PubDate: "2026-06-11T10:00:00+00:00",
+      },
+      {
+        IdCountry: "RSA",
+        Rank: 60,
+        DecimalTotalPoints: 1400,
+        DecimalPrevPoints: 1405,
+        PubDate: "2026-06-11T10:00:00+00:00",
+      },
+    ],
+  };
+}
+
 describe("football-data.org provider preview", () => {
   afterEach(() => vi.unstubAllGlobals());
 
@@ -97,6 +118,37 @@ describe("football-data.org provider preview", () => {
 
     expect(response.state).toBe("not_ready");
     expect(response.prediction).toBeNull();
+  });
+
+  it("uses official FIFA rankings when provider history is sparse", async () => {
+    vi.stubGlobal(
+      "fetch",
+      vi.fn(async (request: RequestInfo | URL) => {
+        const url = String(request);
+        if (url.includes("api.fifa.com/api/v3/rankings")) {
+          return Response.json(fifaRankings());
+        }
+        return Response.json({
+          matches: url.includes("/competitions/WC/matches")
+            ? [footballDataScheduledFixture]
+            : [],
+        });
+      }),
+    );
+
+    const response = await loadProviderPreview(
+      "test-key",
+      new Date("2026-06-11T12:00:00.000Z"),
+      1_000_000,
+    );
+
+    expect(response.prediction).toMatchObject({
+      selectedOutcome: "team_a",
+      sourceCount: 1,
+    });
+    expect(response.prediction?.predictedScoreA90).toBeGreaterThan(
+      response.prediction?.predictedScoreB90 ?? Number.POSITIVE_INFINITY,
+    );
   });
 
   it("selects a requested fixture and lists every match on its Eastern day", async () => {
