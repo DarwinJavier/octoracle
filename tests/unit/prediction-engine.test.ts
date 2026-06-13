@@ -26,6 +26,24 @@ describe("deterministic baseline prediction engine", () => {
     expect(prediction.predictedAdvancingTeamId).toBeNull();
   });
 
+  it("selects a winner when validated ratings have a meaningful gap", () => {
+    const closeButDistinct = predictionInput({
+      teamB: {
+        ...predictionInput().teamA,
+        longTermStrength: 0.55,
+      },
+    });
+    const prediction = buildPrediction(closeButDistinct);
+
+    expect(prediction.selectedOutcome).toBe("team_a");
+    expect(prediction.teamAWinProbability).toBeGreaterThan(
+      prediction.drawProbability,
+    );
+    expect(prediction.predictedScoreA90).toBeGreaterThan(
+      prediction.predictedScoreB90,
+    );
+  });
+
   it("stores a separate advancing team for a knockout 90-minute draw", () => {
     const input = predictionInput({
       stageType: "knockout",

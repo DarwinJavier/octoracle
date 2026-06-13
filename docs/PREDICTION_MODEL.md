@@ -11,7 +11,7 @@
 - No prediction is generated or refreshed after kickoff.
 - Frozen predictions are immutable; corrections create auditable versions or void incompatible predictions.
 
-## Baseline Version 1.0.0
+## Baseline Version 1.1.0
 
 The deterministic development baseline accepts symmetric, validated values from `0` to `1` for both teams. It uses these version-controlled weights:
 
@@ -23,7 +23,7 @@ The deterministic development baseline accepts symmetric, validated values from 
 15% validated public-source consensus
 ```
 
-The engine calculates a weighted advantage, converts team A, draw, and team B logits through softmax, and normalizes the result to exactly one within floating-point tolerance. Draw affinity rises when the teams' weighted ratings are close.
+The engine calculates a weighted advantage, converts team A, draw, and team B logits through softmax, and normalizes the result to exactly one within floating-point tolerance. Draw affinity rises only when the teams' weighted ratings are genuinely close; a meaningful validated rating gap must favor a team outcome.
 
 Expected goals are derived from validated attacking performance and the weighted advantage. An independent Poisson score search selects the most likely 90-minute score that is compatible with the selected outcome. Knockout matches store the 90-minute outcome separately from the team predicted to advance.
 
@@ -33,7 +33,8 @@ The baseline is intentionally transparent and requires calibration against histo
 
 - The input snapshot, weights, and algorithm version produce a SHA-256 `input_snapshot_hash`.
 - Live historical inputs use up to 20 completed matches from a bounded two-year provider window. Recent form, attack, and defense use the most recent eight available matches.
-- Missing provider history, squad evidence, or sufficient consensus produces an explicit neutral `0.5` signal.
+- At least three completed provider matches per team are required for a live provider-preview prediction. When either team lacks that minimum, the prediction remains not ready rather than converting missing evidence into a draw.
+- Missing squad evidence or sufficient consensus produces an explicit neutral `0.5` signal.
 - `prediction_signal_snapshots` stores both teams' normalized signals and exact contributing provider match IDs before prediction publication.
 - The match ID and snapshot produce a deterministic `animation_seed`.
 - Reason codes and the public explanation are generated only from validated numerical inputs.

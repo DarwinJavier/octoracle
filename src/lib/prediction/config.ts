@@ -1,4 +1,4 @@
-export const ALGORITHM_VERSION = "baseline-1.0.0";
+export const ALGORITHM_VERSION = "baseline-1.1.0";
 export const MODEL_VERSION = "deterministic-baseline";
 
 export const PREDICTION_WEIGHTS = {
@@ -10,3 +10,4 @@ export const PREDICTION_WEIGHTS = {
 } as const;
 
 export const MAX_GOALS = 7;
+export const MIN_HISTORY_MATCHES = 3;

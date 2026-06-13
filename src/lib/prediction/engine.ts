@@ -134,11 +134,11 @@ export function buildPrediction(rawInput: PredictionInput): BuiltPrediction {
   const teamARating = rating(input.teamA);
   const teamBRating = rating(input.teamB);
   const advantage = teamARating - teamBRating;
-  const drawAffinity = 1.25 - Math.min(Math.abs(advantage) * 2.5, 0.8);
+  const drawAffinity = 0.25 - Math.min(Math.abs(advantage) * 2, 0.75);
   const [teamAWinProbability, drawProbability, teamBWinProbability] = softmax([
-    advantage * 4,
+    advantage * 6,
     drawAffinity,
-    -advantage * 4,
+    -advantage * 6,
   ]).map((value) => round(value));
   const normalization =
     teamAWinProbability + drawProbability + teamBWinProbability;

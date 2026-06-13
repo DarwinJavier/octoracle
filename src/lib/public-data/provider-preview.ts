@@ -4,6 +4,7 @@ import { FootballDataFixtureProvider } from "@/lib/fixtures/providers/football-d
 import { resolveFeaturedMatch } from "@/lib/fixtures/resolver";
 import type { NormalizedFixture } from "@/lib/fixtures/types";
 import { buildPrediction } from "@/lib/prediction/engine";
+import { MIN_HISTORY_MATCHES } from "@/lib/prediction/config";
 import { calculateHistorySignals } from "@/lib/prediction/signals/history";
 import {
   recordedPreviewPredictionFor,
@@ -67,6 +68,12 @@ async function previewPrediction(
     historyOrEmpty(provider, fixture.teamA.providerId, fixture.kickoffAtUtc),
     historyOrEmpty(provider, fixture.teamB.providerId, fixture.kickoffAtUtc),
   ]);
+  if (
+    teamAHistory.length < MIN_HISTORY_MATCHES ||
+    teamBHistory.length < MIN_HISTORY_MATCHES
+  ) {
+    return null;
+  }
   const teamAId = stableUuid(`team:${fixture.teamA.providerId}`);
   const teamBId = stableUuid(`team:${fixture.teamB.providerId}`);
   const input: PredictionInput = {

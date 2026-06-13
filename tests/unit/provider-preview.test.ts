@@ -10,6 +10,20 @@ import {
   footballDataScheduledFixture,
 } from "../fixtures/football-data-fixtures";
 
+function completedHistory() {
+  return [1, 2, 3].map((id) => ({
+    ...footballDataScheduledFixture,
+    id: 3000 + id,
+    status: "FINISHED",
+    utcDate: `2026-05-0${id}T19:00:00Z`,
+    score: {
+      winner: "HOME_TEAM",
+      duration: "REGULAR",
+      fullTime: { home: 2, away: 0 },
+    },
+  }));
+}
+
 describe("football-data.org provider preview", () => {
   afterEach(() => vi.unstubAllGlobals());
 
@@ -21,7 +35,7 @@ describe("football-data.org provider preview", () => {
         if (url.includes("/competitions/WC/matches")) {
           return Response.json({ matches: [footballDataScheduledFixture] });
         }
-        return Response.json({ matches: [] });
+        return Response.json({ matches: completedHistory() });
       }),
     );
 
@@ -63,6 +77,28 @@ describe("football-data.org provider preview", () => {
     expect(response.prediction).toBeNull();
   });
 
+  it("does not fabricate a draw when validated team history is unavailable", async () => {
+    vi.stubGlobal(
+      "fetch",
+      vi.fn(async (request: RequestInfo | URL) =>
+        Response.json({
+          matches: String(request).includes("/competitions/WC/matches")
+            ? [footballDataScheduledFixture]
+            : [],
+        }),
+      ),
+    );
+
+    const response = await loadProviderPreview(
+      "test-key",
+      new Date("2026-06-11T12:00:00.000Z"),
+      1_000_000,
+    );
+
+    expect(response.state).toBe("not_ready");
+    expect(response.prediction).toBeNull();
+  });
+
   it("selects a requested fixture and lists every match on its Eastern day", async () => {
     const second = {
       ...footballDataScheduledFixture,
@@ -77,7 +113,7 @@ describe("football-data.org provider preview", () => {
             matches: [footballDataScheduledFixture, second],
           });
         }
-        return Response.json({ matches: [] });
+        return Response.json({ matches: completedHistory() });
       }),
     );
 
