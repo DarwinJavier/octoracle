@@ -50,6 +50,42 @@ npm run check
 
 Individual checks are available through `format:check`, `lint`, `typecheck`, `test`, `test:integration`, `test:e2e`, `test:assets`, and `build`.
 
+## Vercel Deployment
+
+Vercel auto-detects this repository as Next.js. No custom build command or output directory is required. The repository pins Node.js 24 and generates the ignored runtime assets during `npm run build`.
+
+Minimum environment variable for the current provider-preview MVP:
+
+```text
+FOOTBALL_DATA_API_KEY
+```
+
+Add these server-side variables after Supabase migrations are applied:
+
+```text
+SUPABASE_URL
+SUPABASE_SERVICE_ROLE_KEY
+INTERNAL_CRON_SECRET
+```
+
+Add these only when secure public-source research is enabled:
+
+```text
+OPENAI_API_KEY
+OPENAI_RESEARCH_MODEL
+ALLOWED_RESEARCH_DOMAINS
+RESEARCH_SOURCE_URLS
+```
+
+Never configure service-role, provider, model, or cron secrets with a `NEXT_PUBLIC_` prefix. Configure `APP_BASE_URL` to the final production URL after the first deployment.
+
+Deploy from the connected GitHub repository in Vercel, or use:
+
+```text
+npx vercel
+npx vercel --prod
+```
+
 ## Fixture Synchronization
 
 - Apply every SQL file in [`supabase/migrations/`](supabase/migrations/) in filename order. The service-role privilege migration is required when applying migrations through the Supabase SQL Editor.

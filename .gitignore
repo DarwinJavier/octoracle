@@ -23,3 +23,5 @@ supabase/.temp/
 
 # Generated runtime assets
 public/assets/
+
+.vercel

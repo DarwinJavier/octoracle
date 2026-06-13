@@ -2,6 +2,9 @@
   "name": "octoracle-2026",
   "version": "0.1.0",
   "private": true,
+  "engines": {
+    "node": "24.x"
+  },
   "scripts": {
     "dev": "next dev",
     "build": "npm run assets:build && next build",
@@ -22,6 +25,7 @@
     "phaser": "3.90.0",
     "react": "19.2.7",
     "react-dom": "19.2.7",
+    "sharp": "0.34.5",
     "zod": "4.4.3"
   },
   "devDependencies": {
@@ -32,13 +36,12 @@
     "@types/node": "24.10.1",
     "@types/react": "19.2.7",
     "@types/react-dom": "19.2.3",
-    "@vitejs/plugin-react": "5.1.1",
+    "@vitejs/plugin-react": "5.2.0",
     "eslint": "9.39.2",
     "eslint-config-next": "16.2.7",
     "jsdom": "27.2.0",
     "postcss": "8.5.15",
     "prettier": "3.7.4",
-    "sharp": "^0.34.5",
     "tailwindcss": "4.3.0",
     "typescript": "5.9.3",
     "vitest": "4.1.8"
