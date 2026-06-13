@@ -1,0 +1,9 @@
+.next
+.codex/skills
+coverage
+node_modules
+playwright-report
+public/assets
+sprites
+test-results
+package-lock.json

@@ -1,0 +1,25 @@
+# Dependencies and build output
+node_modules/
+.next/
+out/
+coverage/
+.vercel/
+.turbo/
+playwright-report/
+test-results/
+*.tsbuildinfo
+
+# Environment and local tooling
+.env*
+!.env.example
+.env.local
+*.log
+.DS_Store
+Thumbs.db
+
+# Supabase local development
+supabase/.branches/
+supabase/.temp/
+
+# Generated runtime assets
+public/assets/

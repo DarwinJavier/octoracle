@@ -1,0 +1,198 @@
+import { z } from "zod";
+
+import { createSupabaseServerHeaders } from "@/lib/db/supabase-auth";
+import type { NormalizedFixture, NormalizedTeam } from "@/lib/fixtures/types";
+import type { FixtureRepository, SyncResult } from "@/lib/fixtures/sync";
+
+const teamIdSchema = z.array(
+  z
+    .object({ id: z.string().uuid(), provider_id: z.string().min(1) })
+    .passthrough(),
+);
+const jobRunSchema = z.array(
+  z
+    .object({
+      run_key: z.string(),
+      records_read: z.number().int(),
+      records_written: z.number().int(),
+    })
+    .passthrough(),
+);
+
+type SupabaseFixtureRepositoryOptions = {
+  supabaseUrl: string;
+  serviceRoleKey: string;
+  fetchImplementation?: typeof fetch;
+};
+
+export class SupabaseFixtureRepository implements FixtureRepository {
+  private readonly fetchImplementation: typeof fetch;
+  private readonly restUrl: string;
+
+  constructor(private readonly options: SupabaseFixtureRepositoryOptions) {
+    this.fetchImplementation = options.fetchImplementation ?? fetch;
+    this.restUrl = `${options.supabaseUrl.replace(/\/$/, "")}/rest/v1`;
+  }
+
+  private async request(path: string, init: RequestInit = {}) {
+    const response = await this.fetchImplementation(`${this.restUrl}/${path}`, {
+      ...init,
+      headers: {
+        ...createSupabaseServerHeaders(this.options.serviceRoleKey),
+        ...init.headers,
+      },
+      cache: "no-store",
+    });
+    if (!response.ok) {
+      const detail = (await response.text()).slice(0, 300);
+      throw new Error(
+        `Supabase fixture repository ${init.method ?? "GET"} ${path.split("?")[0]} failed with status ${response.status}: ${detail}`,
+      );
+    }
+    return response;
+  }
+
+  async findCompletedRun(runKey: string) {
+    const response = await this.request(
+      `job_runs?select=run_key,records_read,records_written&job_name=eq.sync_fixtures&run_key=eq.${encodeURIComponent(runKey)}&status=eq.succeeded&limit=1`,
+    );
+    const rows = jobRunSchema.parse(await response.json());
+    const row = rows[0];
+    if (!row) return null;
+    return {
+      status: "succeeded",
+      runKey: row.run_key,
+      recordsRead: row.records_read,
+      recordsWritten: row.records_written,
+    } satisfies SyncResult;
+  }
+
+  async withJobLock<T>(jobName: string, work: () => Promise<T>) {
+    const now = new Date();
+    const expiresAt = new Date(now.getTime() + 5 * 60_000);
+    await this.request(
+      `job_locks?job_name=eq.${encodeURIComponent(jobName)}&expires_at=lt.${encodeURIComponent(now.toISOString())}`,
+      { method: "DELETE" },
+    );
+    await this.request("job_locks", {
+      method: "POST",
+      headers: { Prefer: "return=minimal" },
+      body: JSON.stringify({
+        job_name: jobName,
+        acquired_at: now,
+        expires_at: expiresAt,
+      }),
+    });
+
+    try {
+      return await work();
+    } finally {
+      await this.request(
+        `job_locks?job_name=eq.${encodeURIComponent(jobName)}`,
+        {
+          method: "DELETE",
+        },
+      );
+    }
+  }
+
+  async upsertTeams(teams: NormalizedTeam[]) {
+    if (teams.length === 0) return 0;
+    await this.request("teams?on_conflict=provider_id", {
+      method: "POST",
+      headers: { Prefer: "resolution=merge-duplicates,return=minimal" },
+      body: JSON.stringify(
+        teams.map((team) => ({
+          provider_id: team.providerId,
+          fifa_code: team.fifaCode,
+          name: team.name,
+          short_name: team.shortName,
+          flag_asset_url: team.flagAssetUrl,
+          updated_at: new Date().toISOString(),
+        })),
+      ),
+    });
+    return teams.length;
+  }
+
+  async upsertFixtures(fixtures: NormalizedFixture[]) {
+    if (fixtures.length === 0) return 0;
+    const teamsResponse = await this.request("teams?select=id,provider_id");
+    const teamRows = teamIdSchema.parse(await teamsResponse.json());
+    const teamIds = new Map(
+      teamRows.map((team) => [team.provider_id, team.id]),
+    );
+
+    await this.request("matches?on_conflict=provider_id", {
+      method: "POST",
+      headers: { Prefer: "resolution=merge-duplicates,return=minimal" },
+      body: JSON.stringify(
+        fixtures.map((fixture) => ({
+          provider_id: fixture.providerId,
+          official_match_number: fixture.officialMatchNumber,
+          stage: fixture.stage,
+          group_code: fixture.groupCode,
+          team_a_id: fixture.teamA
+            ? teamIds.get(fixture.teamA.providerId)
+            : null,
+          team_b_id: fixture.teamB
+            ? teamIds.get(fixture.teamB.providerId)
+            : null,
+          team_a_placeholder: fixture.teamAPlaceholder,
+          team_b_placeholder: fixture.teamBPlaceholder,
+          kickoff_at_utc: fixture.kickoffAtUtc,
+          venue: fixture.venue,
+          city: fixture.city,
+          status: fixture.status,
+          score_a_90: fixture.scoreA90,
+          score_b_90: fixture.scoreB90,
+          score_a_final: fixture.scoreAFinal,
+          score_b_final: fixture.scoreBFinal,
+          winner_team_id: fixture.winnerProviderTeamId
+            ? teamIds.get(fixture.winnerProviderTeamId)
+            : null,
+          last_provider_update_at: fixture.lastProviderUpdateAt,
+          updated_at: new Date().toISOString(),
+        })),
+      ),
+    });
+    return fixtures.length;
+  }
+
+  async recordCompletedRun(result: SyncResult) {
+    const now = new Date().toISOString();
+    await this.request("job_runs?on_conflict=job_name,run_key", {
+      method: "POST",
+      headers: { Prefer: "resolution=merge-duplicates,return=minimal" },
+      body: JSON.stringify({
+        job_name: "sync_fixtures",
+        status: "succeeded",
+        started_at: now,
+        finished_at: now,
+        records_read: result.recordsRead,
+        records_written: result.recordsWritten,
+        run_key: result.runKey,
+      }),
+    });
+  }
+
+  async recordFailedRun(runKey: string, errorCode: string) {
+    const now = new Date().toISOString();
+    await this.request("job_runs?on_conflict=job_name,run_key", {
+      method: "POST",
+      headers: { Prefer: "resolution=merge-duplicates,return=minimal" },
+      body: JSON.stringify({
+        job_name: "sync_fixtures",
+        status: "failed",
+        started_at: now,
+        finished_at: now,
+        records_read: 0,
+        records_written: 0,
+        error_code: errorCode,
+        error_summary:
+          "Fixture synchronization failed; inspect structured provider telemetry.",
+        run_key: runKey,
+      }),
+    });
+  }
+}
