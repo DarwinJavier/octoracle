@@ -71,12 +71,34 @@ export async function loadFeaturedMatch(
     if (selectedMatchId) {
       const selected = await loadMatch(selectedMatchId);
       if (selected?.match) return selected;
+      if (footballDataApiKey) {
+        try {
+          return await loadProviderPreview(
+            footballDataApiKey,
+            new Date(),
+            Number(process.env.FIXTURE_STALE_MINUTES ?? 30),
+            selectedMatchId,
+          );
+        } catch {
+          // Continue to the stored featured match before reporting an error.
+        }
+      }
     }
-    return await getFeaturedMatchResponse(
+    const stored = await getFeaturedMatchResponse(
       repository,
       new Date(),
       Number(process.env.FIXTURE_STALE_MINUTES ?? 30),
     );
+    if (stored.match || !footballDataApiKey) return stored;
+    try {
+      return await loadProviderPreview(
+        footballDataApiKey,
+        new Date(),
+        Number(process.env.FIXTURE_STALE_MINUTES ?? 30),
+      );
+    } catch {
+      return stored;
+    }
   } catch {
     if (footballDataApiKey) {
       try {
@@ -102,19 +124,20 @@ export async function loadFeaturedMatch(
 }
 
 export async function loadDailyMatches(response: FeaturedMatchResponse) {
-  if (!response.match) return [];
   const footballDataApiKey = process.env.FOOTBALL_DATA_API_KEY;
-  if (response.dataSource === "provider_preview" && footballDataApiKey) {
+  if (footballDataApiKey) {
     try {
-      return await loadProviderDayMatches(
+      const providerMatches = await loadProviderDayMatches(
         footballDataApiKey,
-        response.match.kickoffAtUtc,
+        response.match?.kickoffAtUtc ?? new Date().toISOString(),
       );
+      if (providerMatches.length > 0) return providerMatches;
     } catch {
-      return [{ match: response.match, result: response.result }];
+      // Fall back to the validated stored response below.
     }
   }
 
+  if (!response.match) return [];
   const repository = createPublicDataRepository();
   if (!repository) return [{ match: response.match, result: response.result }];
   try {
