@@ -7,8 +7,14 @@ test("keeps the frozen prediction visible after kickoff and reload", async ({
   await expect(
     page.getByRole("status").filter({ hasText: "Match in progress" }),
   ).toBeVisible();
-  await page.getByRole("button", { name: "Ask the Octopus" }).click();
+  await expect(
+    page.getByRole("heading", { name: "The octopus has already spoken" }),
+  ).toBeVisible();
   await expect(page.getByText("Frozen prediction - Version 1")).toBeVisible();
+  await expect(page.getByText(/Mexico 2.*1 South Africa/)).toBeVisible();
+  await expect(
+    page.getByRole("button", { name: "Ask the Octopus" }),
+  ).toHaveCount(0);
 
   await page.reload();
   await expect(
@@ -18,5 +24,5 @@ test("keeps the frozen prediction visible after kickoff and reload", async ({
   ).toBeVisible();
   await expect(
     page.getByRole("button", { name: "Ask the Octopus" }),
-  ).toBeVisible();
+  ).toHaveCount(0);
 });

@@ -77,6 +77,7 @@ export default async function Home({ searchParams }: HomeProps) {
         response.state !== "finished" ? (
           <AquariumExperience
             forceAssetFailure={params.animation === "error"}
+            isInProgress={response.state === "in_progress"}
             isPreview={response.dataSource === "provider_preview"}
             match={response.match}
             prediction={response.prediction}

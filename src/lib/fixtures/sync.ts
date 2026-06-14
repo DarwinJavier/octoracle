@@ -16,6 +16,7 @@ export type FixtureRepository = {
   withJobLock<T>(jobName: string, work: () => Promise<T>): Promise<T>;
   upsertTeams(teams: NormalizedTeam[]): Promise<number>;
   upsertFixtures(fixtures: NormalizedFixture[]): Promise<number>;
+  backfillRecordedPredictions(): Promise<number>;
   recordCompletedRun(result: SyncResult): Promise<void>;
   recordFailedRun(runKey: string, errorCode: string): Promise<void>;
 };
@@ -45,11 +46,12 @@ export async function syncFixtures(
       const fixtures = await provider.fetchFixtures();
       const teamWrites = await repository.upsertTeams(uniqueTeams(fixtures));
       const fixtureWrites = await repository.upsertFixtures(fixtures);
+      const predictionWrites = await repository.backfillRecordedPredictions();
       const result: SyncResult = {
         status: "succeeded",
         runKey,
         recordsRead: fixtures.length,
-        recordsWritten: teamWrites + fixtureWrites,
+        recordsWritten: teamWrites + fixtureWrites + predictionWrites,
       };
       await repository.recordCompletedRun(result);
       return result;

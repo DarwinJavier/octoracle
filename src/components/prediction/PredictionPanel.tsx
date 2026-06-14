@@ -5,11 +5,13 @@ import { formatUtcDateTime } from "@/lib/time";
 import type { StaticMatch, StaticPrediction } from "@/types/public";
 
 export function PredictionPanel({
+  isInProgress = false,
   isPreview = false,
   match,
   prediction,
   revealed,
 }: {
+  isInProgress?: boolean;
   isPreview?: boolean;
   match: StaticMatch;
   prediction: StaticPrediction;
@@ -29,18 +31,26 @@ export function PredictionPanel({
       <div className="prediction-intro">
         <div>
           <p>
-            {isPreview
-              ? "Live provider preview"
-              : `${prediction.status === "frozen" ? "Frozen" : "Stored"} prediction - Version ${prediction.version}`}
+            {isInProgress
+              ? `Frozen prediction - Version ${prediction.version}`
+              : isPreview
+                ? "Live provider preview"
+                : `${prediction.status === "frozen" ? "Frozen" : "Stored"} prediction - Version ${prediction.version}`}
           </p>
-          <h2 id="prediction-heading">The Octopus has spoken</h2>
+          <h2 id="prediction-heading">
+            {isInProgress
+              ? "The Octopus already spoke"
+              : "The Octopus has spoken"}
+          </h2>
           <span>
             {isPreview
               ? "A deterministic statistical preview, performed with eight times the drama."
               : "A source-backed prediction, performed with eight times the drama."}
           </span>
         </div>
-        <span className="reveal-complete">Prediction revealed</span>
+        <span className="reveal-complete">
+          {isInProgress ? "Frozen at kickoff" : "Prediction revealed"}
+        </span>
       </div>
 
       <div className="prediction-reveal" aria-live="polite">

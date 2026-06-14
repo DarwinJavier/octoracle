@@ -3,6 +3,10 @@ import { z } from "zod";
 import { createSupabaseServerHeaders } from "@/lib/db/supabase-auth";
 import type { NormalizedFixture, NormalizedTeam } from "@/lib/fixtures/types";
 import type { FixtureRepository, SyncResult } from "@/lib/fixtures/sync";
+import {
+  recordedPreviewPredictionFor,
+  recordedPreviewPredictionIds,
+} from "@/lib/prediction/preview-ledger";
 
 const teamIdSchema = z.array(
   z
@@ -17,6 +21,12 @@ const jobRunSchema = z.array(
       records_written: z.number().int(),
     })
     .passthrough(),
+);
+const matchIdSchema = z.array(
+  z.object({ id: z.string().uuid(), provider_id: z.string().min(1) }).strict(),
+);
+const predictionMatchIdSchema = z.array(
+  z.object({ match_id: z.string().uuid() }).strict(),
 );
 
 type SupabaseFixtureRepositoryOptions = {
@@ -157,6 +167,75 @@ export class SupabaseFixtureRepository implements FixtureRepository {
       ),
     });
     return fixtures.length;
+  }
+
+  async backfillRecordedPredictions() {
+    const recordedIds = recordedPreviewPredictionIds();
+    if (recordedIds.length === 0) return 0;
+    const providerFilter = recordedIds
+      .map((id) => `"${id.replaceAll('"', '\\"')}"`)
+      .join(",");
+    const matches = matchIdSchema.parse(
+      await (
+        await this.request(
+          `matches?select=id,provider_id&provider_id=in.(${encodeURIComponent(providerFilter)})`,
+        )
+      ).json(),
+    );
+    if (matches.length === 0) return 0;
+
+    const matchFilter = matches.map(({ id }) => `"${id}"`).join(",");
+    const existing = predictionMatchIdSchema.parse(
+      await (
+        await this.request(
+          `predictions?select=match_id&match_id=in.(${encodeURIComponent(matchFilter)})`,
+        )
+      ).json(),
+    );
+    const existingMatchIds = new Set(existing.map(({ match_id }) => match_id));
+    const rows = matches.flatMap((match) => {
+      if (existingMatchIds.has(match.id)) return [];
+      const prediction = recordedPreviewPredictionFor(match.provider_id);
+      if (!prediction) return [];
+      const isFrozen = Date.now() >= Date.parse(prediction.freezeAt);
+      return [
+        {
+          match_id: match.id,
+          version: prediction.version,
+          status: isFrozen ? "frozen" : "published",
+          team_a_win_probability: prediction.teamAWinProbability,
+          draw_probability: prediction.drawProbability,
+          team_b_win_probability: prediction.teamBWinProbability,
+          expected_goals_a: prediction.predictedScoreA90,
+          expected_goals_b: prediction.predictedScoreB90,
+          predicted_score_a_90: prediction.predictedScoreA90,
+          predicted_score_b_90: prediction.predictedScoreB90,
+          predicted_advancing_team_id: null,
+          selected_outcome: prediction.selectedOutcome,
+          confidence: prediction.confidence,
+          reason_codes: prediction.reasonCodes,
+          public_explanation: prediction.publicExplanation,
+          source_count: prediction.sourceCount,
+          generated_at: prediction.generatedAt,
+          freeze_at: prediction.freezeAt,
+          frozen_at: isFrozen
+            ? (prediction.frozenAt ?? prediction.freezeAt)
+            : null,
+          animation_seed: prediction.animationSeed,
+          model_version: "reviewed-preview-v1",
+          algorithm_version: "reviewed-preview-v1",
+          input_snapshot_hash: `reviewed-preview:${match.provider_id}:v${prediction.version}`,
+        },
+      ];
+    });
+    if (rows.length === 0) return 0;
+
+    await this.request("predictions", {
+      method: "POST",
+      headers: { Prefer: "return=minimal" },
+      body: JSON.stringify(rows),
+    });
+    return rows.length;
   }
 
   async recordCompletedRun(result: SyncResult) {

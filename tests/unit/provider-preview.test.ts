@@ -9,6 +9,7 @@ import {
   footballDataLiveFixture,
   footballDataScheduledFixture,
 } from "../fixtures/football-data-fixtures";
+import { recordedPreviewPredictionIds } from "@/lib/prediction/preview-ledger";
 
 function completedHistory() {
   return [1, 2, 3].map((id) => ({
@@ -47,6 +48,21 @@ function fifaRankings() {
 
 describe("football-data.org provider preview", () => {
   afterEach(() => vi.unstubAllGlobals());
+
+  it("keeps every reviewed preview prediction in the immutable fallback ledger", () => {
+    expect(recordedPreviewPredictionIds()).toEqual(
+      expect.arrayContaining([
+        "537333",
+        "537345",
+        "537334",
+        "537339",
+        "537340",
+        "537346",
+        "537351",
+        "537357",
+      ]),
+    );
+  });
 
   it("renders a deterministic MVP prediction from validated provider data", async () => {
     vi.stubGlobal(

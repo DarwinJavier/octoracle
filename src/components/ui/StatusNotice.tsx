@@ -42,12 +42,16 @@ export function StatusNotice({
         <strong>
           {response.state === "finished"
             ? "Recorded prediction comparison"
-            : "Live provider preview"}
+            : response.state === "in_progress"
+              ? "Match in progress"
+              : "Live provider preview"}
         </strong>
         <span>
           {response.state === "finished"
             ? "Showing the real provider result beside the prediction recorded before kickoff."
-            : response.warning}
+            : response.state === "in_progress"
+              ? "The octopus has already spoken. Its frozen pre-match prediction remains visible, and no new prediction can be generated."
+              : response.warning}
         </span>
       </aside>
     );

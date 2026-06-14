@@ -82,4 +82,28 @@ describe("Home", () => {
       screen.queryByRole("button", { name: "Ask the Octopus" }),
     ).not.toBeInTheDocument();
   });
+
+  it("keeps the tank and frozen prediction visible without a new ritual after kickoff", async () => {
+    render(
+      await Home({
+        searchParams: Promise.resolve({
+          animation: "error",
+          state: "in_progress",
+        }),
+      }),
+    );
+
+    expect(
+      screen.getByRole("heading", {
+        name: "The octopus has already spoken",
+      }),
+    ).toBeInTheDocument();
+    expect(
+      screen.getByRole("heading", { name: "The Octopus already spoke" }),
+    ).toBeInTheDocument();
+    expect(screen.getByText(/Mexico 2.*1 South Africa/)).toBeInTheDocument();
+    expect(
+      screen.queryByRole("button", { name: "Ask the Octopus" }),
+    ).not.toBeInTheDocument();
+  });
 });

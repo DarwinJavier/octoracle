@@ -11,6 +11,7 @@ A mobile-first World Cup entertainment and sports-analysis experience where a pl
 - **Live fixture integration:** Uses football-data.org v4 behind a provider-neutral adapter and validates all provider responses.
 - **Versioning and freezing:** Preserves prediction history, freezes predictions exactly at kickoff using server UTC, and never silently edits frozen records.
 - **Results and accuracy:** Synchronizes completed results, records revisions, and compares frozen predictions with real outcomes.
+- **Reviewed prediction backfill:** Protected fixture sync copies recorded preview-ledger forecasts into Supabase once their fixtures exist, without overwriting stored prediction history.
 - **Secure research pipeline:** Fetches only server-controlled, allowlisted HTTPS sources and validates strict structured observations before they influence the model.
 - **Mobile and accessible UI:** Includes responsive layouts, semantic prediction text, keyboard activation, reduced motion, and animation skipping.
 - **Honest fallback states:** Clearly reports stale data, unavailable providers, unknown teams, in-progress matches, and predictions that are not ready.
