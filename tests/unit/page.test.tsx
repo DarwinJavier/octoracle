@@ -19,9 +19,19 @@ describe("Home", () => {
     expect(
       screen.getByRole("img", { name: "South Africa flag" }),
     ).toBeInTheDocument();
+    expect(screen.getByText("Created by Darwin Hernandez")).toBeInTheDocument();
     expect(
-      screen.getByText(/entertainment and sports analysis only/i),
+      screen.getByText("For entertainment purposes only."),
     ).toBeInTheDocument();
+    expect(
+      screen.getByRole("link", { name: "More info: darwinhernandez.com" }),
+    ).toHaveAttribute("href", "https://darwinhernandez.com");
+    expect(
+      screen.getByRole("link", { name: "Official FIFA calendar and scores" }),
+    ).toHaveAttribute(
+      "href",
+      "https://www.fifa.com/en/tournaments/mens/worldcup/canadamexicousa2026/scores-fixtures",
+    );
     expect(
       screen.getByRole("link", { name: "Previous results" }),
     ).toHaveAttribute("href", "#accuracy-history");

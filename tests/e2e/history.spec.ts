@@ -13,5 +13,13 @@ test("shows completed prediction accuracy at tournament completion", async ({
   );
   await expect(
     page.getByText("Predicted 2–1. Outcome correct; exact score correct."),
+  ).toBeHidden();
+  await page.getByText("Show previous matches (1)", { exact: true }).click();
+  await expect(
+    page.getByText("Predicted 2–1. Outcome correct; exact score correct."),
   ).toBeVisible();
+  await page.getByText("Hide previous matches", { exact: true }).click();
+  await expect(
+    page.getByText("Predicted 2–1. Outcome correct; exact score correct."),
+  ).toBeHidden();
 });

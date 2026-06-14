@@ -100,11 +100,30 @@ export default async function Home({ searchParams }: HomeProps) {
         <AccuracyHistory history={history} />
 
         <footer className="disclaimer">
-          <strong>For entertainment and sports analysis only.</strong>
-          <span>
-            Predictions express uncertainty. They are not guarantees or wagering
-            advice.
-          </span>
+          <div>
+            <strong>Created by Darwin Hernandez</strong>
+            <span>For entertainment purposes only.</span>
+            <span>
+              Predictions express uncertainty. They are not guarantees or
+              wagering advice.
+            </span>
+          </div>
+          <nav aria-label="Project and tournament links">
+            <a
+              href="https://darwinhernandez.com"
+              target="_blank"
+              rel="noreferrer"
+            >
+              More info: darwinhernandez.com
+            </a>
+            <a
+              href="https://www.fifa.com/en/tournaments/mens/worldcup/canadamexicousa2026/scores-fixtures"
+              target="_blank"
+              rel="noreferrer"
+            >
+              Official FIFA calendar and scores
+            </a>
+          </nav>
         </footer>
       </div>
     </main>

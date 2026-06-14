@@ -978,6 +978,87 @@ a:focus-visible {
   color: var(--ink);
 }
 
+.disclaimer div,
+.disclaimer nav {
+  display: grid;
+  gap: 4px;
+}
+
+.disclaimer nav {
+  align-content: start;
+  text-align: right;
+}
+
+.disclaimer a {
+  color: var(--cyan);
+  font-weight: 800;
+  text-decoration: none;
+}
+
+.disclaimer a:hover,
+.disclaimer a:focus-visible {
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+
+.history-details {
+  margin-top: 16px;
+}
+
+.history-details summary {
+  display: flex;
+  min-height: 48px;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  padding: 12px 16px;
+  border: 1px solid var(--line);
+  border-radius: 14px;
+  color: var(--cyan);
+  cursor: pointer;
+  font-size: 0.78rem;
+  font-weight: 900;
+  letter-spacing: 0.06em;
+  list-style: none;
+  text-transform: uppercase;
+}
+
+.history-details summary::-webkit-details-marker {
+  display: none;
+}
+
+.history-details summary:hover,
+.history-details summary:focus-visible {
+  border-color: rgba(123, 229, 239, 0.6);
+  background: rgba(77, 228, 231, 0.06);
+  outline: none;
+}
+
+.history-hide-label {
+  display: none;
+}
+
+.history-chevron {
+  font-size: 1.2rem;
+  line-height: 1;
+}
+
+.history-details[open] .history-show-label {
+  display: none;
+}
+
+.history-details[open] .history-hide-label {
+  display: inline;
+}
+
+.history-details[open] .history-chevron {
+  transform: rotate(45deg);
+}
+
+.history-list {
+  margin-top: 12px;
+}
+
 .accuracy-history-empty {
   display: flex;
   align-items: center;
@@ -1094,6 +1175,10 @@ a:focus-visible {
   .disclaimer {
     align-items: flex-start;
     flex-direction: column;
+  }
+
+  .disclaimer nav {
+    text-align: left;
   }
 
   .ritual-buttons,
