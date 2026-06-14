@@ -5,6 +5,7 @@ import { MatchCard } from "@/components/match/MatchCard";
 import { DailyMatchSelector } from "@/components/match/DailyMatchSelector";
 import { StatusNotice } from "@/components/ui/StatusNotice";
 import { AccuracyHistory } from "@/components/prediction/AccuracyHistory";
+import { ClosedMatchNotice } from "@/components/prediction/ClosedMatchNotice";
 import { CompletedMatchComparison } from "@/components/prediction/CompletedMatchComparison";
 import { demoHistory, loadPredictionHistory } from "@/lib/history/load";
 import {
@@ -89,6 +90,8 @@ export default async function Home({ searchParams }: HomeProps) {
           >
             <p>The octopus is still thinking. Check again later.</p>
           </section>
+        ) : response.match && response.state === "in_progress" ? (
+          <ClosedMatchNotice />
         ) : null}
         {response.match && response.result && response.state === "finished" ? (
           <CompletedMatchComparison

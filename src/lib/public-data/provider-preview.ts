@@ -234,6 +234,7 @@ export async function loadProviderPreview(
       featured,
       prediction !== null,
       selectedMatch ? false : resolution.stale,
+      now,
     ),
     match: toPublicMatch(featured),
     prediction,

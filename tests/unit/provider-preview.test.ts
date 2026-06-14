@@ -114,6 +114,27 @@ describe("football-data.org provider preview", () => {
     expect(response.prediction).toBeNull();
   });
 
+  it("closes a selected match after kickoff even when provider status is delayed", async () => {
+    vi.stubGlobal(
+      "fetch",
+      vi.fn(async () =>
+        Response.json({
+          matches: [footballDataScheduledFixture],
+        }),
+      ),
+    );
+
+    const response = await loadProviderPreview(
+      "test-key",
+      new Date("2026-06-11T19:30:00.000Z"),
+      1_000_000,
+      String(footballDataScheduledFixture.id),
+    );
+
+    expect(response.state).toBe("in_progress");
+    expect(response.prediction).toBeNull();
+  });
+
   it("does not fabricate a draw when validated team history is unavailable", async () => {
     vi.stubGlobal(
       "fetch",

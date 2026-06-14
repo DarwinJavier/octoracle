@@ -2,7 +2,10 @@ import { describe, expect, it } from "vitest";
 
 import type { NormalizedFixture } from "@/lib/fixtures/types";
 import type { PublicDataRepository } from "@/lib/public-data/repository";
-import { getFeaturedMatchResponse } from "@/lib/public-data/service";
+import {
+  getFeaturedMatchResponse,
+  publicStateFor,
+} from "@/lib/public-data/service";
 import { staticPrediction } from "@/lib/static-match";
 
 function fixture(
@@ -78,6 +81,13 @@ describe("public featured-match service", () => {
     );
     expect(response.state).toBe("not_ready");
     expect(response.prediction).toBeNull();
+  });
+
+  it("closes prediction entry when kickoff passed before provider status updates", () => {
+    const delayed = fixture("scheduled");
+    delayed.kickoffAtUtc = "2026-06-11T18:00:00.000Z";
+
+    expect(publicStateFor(delayed, false, false, now)).toBe("in_progress");
   });
 
   it("returns stale and tournament-complete states explicitly", async () => {

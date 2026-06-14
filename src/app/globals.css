@@ -1059,6 +1059,45 @@ a:focus-visible {
   margin-top: 12px;
 }
 
+.closed-match-panel {
+  display: grid;
+  gap: 12px;
+}
+
+.closed-match-panel p {
+  margin: 0;
+  color: var(--cyan);
+  font-size: 0.68rem;
+  font-weight: 900;
+  letter-spacing: 0.11em;
+  text-transform: uppercase;
+}
+
+.closed-match-panel h2 {
+  margin: 0;
+  font-family: var(--font-display);
+  font-size: clamp(1.5rem, 4vw, 2.4rem);
+  letter-spacing: -0.06em;
+}
+
+.closed-match-panel span {
+  color: var(--muted);
+  line-height: 1.6;
+}
+
+.closed-match-panel .secondary-button {
+  justify-self: start;
+  margin-top: 4px;
+  text-decoration: none;
+}
+
+.next-match-button {
+  grid-column: 1 / -1;
+  justify-self: start;
+  margin: 4px 16px 16px;
+  text-decoration: none;
+}
+
 .accuracy-history-empty {
   display: flex;
   align-items: center;

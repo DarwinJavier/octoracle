@@ -58,7 +58,7 @@ export function PredictionPanel({
           <span className={`confidence confidence-${prediction.confidence}`}>
             {prediction.confidence} confidence
           </span>
-          <p>Predicted result</p>
+          <p>{isInProgress ? "The prediction was" : "Predicted result"}</p>
           <h3>{selectedOutcome}</h3>
           <strong>
             {match.teamA.shortName} {prediction.predictedScoreA90}–
@@ -118,6 +118,11 @@ export function PredictionPanel({
             ? "Prediction generated from multiple public sources and statistical signals."
             : "Baseline statistical prediction. Approved public-source consensus arrives in Step 7."}
         </p>
+        {isInProgress ? (
+          <a className="secondary-button next-match-button" href="#games-today">
+            Reveal a prediction for the next match
+          </a>
+        ) : null}
       </div>
     </section>
   );
