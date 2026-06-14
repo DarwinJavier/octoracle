@@ -13,6 +13,13 @@ describe("ClosedMatchNotice", () => {
       }),
     ).toBeInTheDocument();
     expect(
+      screen
+        .getByRole("img", {
+          name: /OctoOracle sleeping in the aquarium/i,
+        })
+        .getAttribute("src"),
+    ).toContain("octopus-sleeping-scene.png");
+    expect(
       screen.getByText(/will not invent one after kickoff/i),
     ).toBeVisible();
     expect(

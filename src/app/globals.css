@@ -1061,6 +1061,20 @@ a:focus-visible {
 
 .closed-match-panel {
   display: grid;
+  gap: 18px;
+  overflow: hidden;
+}
+
+.closed-match-illustration {
+  display: block;
+  width: 100%;
+  height: auto;
+  border: 1px solid rgba(123, 229, 239, 0.35);
+  border-radius: 18px;
+}
+
+.closed-match-copy {
+  display: grid;
   gap: 12px;
 }
 
@@ -1085,7 +1099,7 @@ a:focus-visible {
   line-height: 1.6;
 }
 
-.closed-match-panel .secondary-button {
+.closed-match-copy .secondary-button {
   justify-self: start;
   margin-top: 4px;
   text-decoration: none;
