@@ -11,7 +11,7 @@ A mobile-first World Cup entertainment and sports-analysis experience where a pl
 - **Live fixture integration:** Uses football-data.org v4 behind a provider-neutral adapter and validates all provider responses.
 - **Versioning and freezing:** Preserves prediction history, freezes predictions exactly at kickoff using server UTC, and never silently edits frozen records.
 - **Results and accuracy:** Synchronizes completed results, records revisions, and compares frozen predictions with real outcomes.
-- **Automatic prediction recording:** Protected fixture sync publishes missing predictions up to 48 hours before kickoff, refreshes eligible predictions every three hours, freezes due predictions, and backfills reviewed preview-ledger forecasts without overwriting stored history.
+- **Automatic prediction recording:** Protected fixture sync publishes the earliest due predictions up to 48 hours before kickoff in bounded batches, refreshes eligible predictions every three hours, freezes due predictions, and backfills reviewed preview-ledger forecasts without overwriting stored history.
 - **Secure research pipeline:** Fetches only server-controlled, allowlisted HTTPS sources and validates strict structured observations before they influence the model.
 - **Mobile and accessible UI:** Includes responsive layouts, semantic prediction text, keyboard activation, reduced motion, and animation skipping.
 - **Honest fallback states:** Clearly reports stale data, unavailable providers, unknown teams, in-progress matches, and predictions that are not ready.

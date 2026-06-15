@@ -155,4 +155,29 @@ describe("live prediction build", () => {
     });
     expect(repository.snapshot?.inputHash).toBeTruthy();
   });
+
+  it("bounds each sync batch so scheduled builds finish reliably", async () => {
+    const repository = new MemoryRepository() as MemoryRepository & {
+      listPredictionBuildCandidates: () => Promise<string[]>;
+    };
+    const matchIds = Array.from(
+      { length: 6 },
+      (_, index) =>
+        `00000000-0000-4000-8000-${String(index + 1).padStart(12, "0")}`,
+    );
+    repository.listPredictionBuildCandidates = async () => matchIds;
+
+    const result = await buildDuePredictions(
+      {
+        async fetchCompletedTeamMatches() {
+          return [];
+        },
+      },
+      repository,
+      new Date("2026-06-11T17:00:00.000Z"),
+    );
+
+    expect(result.built).toHaveLength(4);
+    expect(result.failed).toHaveLength(0);
+  });
 });

@@ -8,6 +8,8 @@ import { applyConsensusToPredictionInput } from "@/lib/research/prediction-input
 import type { SourceObservation } from "@/lib/research/types";
 import type { PredictionRepository } from "./lifecycle";
 
+const MAX_PREDICTIONS_PER_SYNC = 4;
+
 export type PredictionBuildContext = {
   matchId: string;
   kickoffAtUtc: string;
@@ -127,7 +129,9 @@ export async function buildDuePredictions(
   repository: ScheduledPredictionBuildRepository,
   now = new Date(),
 ) {
-  const matchIds = await repository.listPredictionBuildCandidates(now, 48, 3);
+  const matchIds = (
+    await repository.listPredictionBuildCandidates(now, 48, 3)
+  ).slice(0, MAX_PREDICTIONS_PER_SYNC);
   const built: string[] = [];
   const failed: string[] = [];
 
