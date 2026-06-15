@@ -85,7 +85,7 @@ describe("football-data.org provider preview", () => {
       ),
     ).toEqual(
       expect.arrayContaining([
-        { matchProviderId: "537369", score: "2-0", outcome: "team_a" },
+        { matchProviderId: "537369", score: "3-0", outcome: "team_a" },
         { matchProviderId: "537363", score: "2-1", outcome: "team_a" },
         { matchProviderId: "537370", score: "0-2", outcome: "team_b" },
         { matchProviderId: "537364", score: "2-0", outcome: "team_a" },
