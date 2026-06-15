@@ -161,6 +161,26 @@ const RECORDED_PREVIEW_PREDICTIONS = {
     teamBWinProbability: 0.26,
     version: 1,
   }),
+  "537352": publicPredictionSchema.parse({
+    animationSeed: "ivory-coast-ecuador-preview-v1",
+    confidence: "medium",
+    drawProbability: 0.28,
+    freezeAt: "2026-06-14T23:00:00.000Z",
+    frozenAt: "2026-06-14T23:00:00.000Z",
+    generatedAt: "2026-06-14T22:30:00.000Z",
+    predictedAdvancingTeamId: null,
+    predictedScoreA90: 0,
+    predictedScoreB90: 1,
+    publicExplanation:
+      "The reviewed forecast gave Ecuador a narrow edge while preserving meaningful draw and Ivory Coast chances.",
+    reasonCodes: ["reviewed_forecast", "narrow_edge"],
+    selectedOutcome: "team_b",
+    sourceCount: 0,
+    status: "frozen",
+    teamAWinProbability: 0.26,
+    teamBWinProbability: 0.46,
+    version: 1,
+  }),
 } as const;
 
 export function recordedPreviewPredictionIds() {

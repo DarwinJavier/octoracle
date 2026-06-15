@@ -60,6 +60,7 @@ describe("football-data.org provider preview", () => {
         "537346",
         "537351",
         "537357",
+        "537352",
       ]),
     );
   });
