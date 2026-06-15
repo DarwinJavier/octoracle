@@ -11,6 +11,7 @@ export const staticMatch: StaticMatch = {
   teamA: {
     id: "static-mexico",
     fifaCode: "MEX",
+    fifaRank: 14,
     flagAssetUrl: null,
     flagEmoji: "🇲🇽",
     name: "Mexico",
@@ -19,6 +20,7 @@ export const staticMatch: StaticMatch = {
   teamB: {
     id: "static-south-africa",
     fifaCode: "RSA",
+    fifaRank: 60,
     flagAssetUrl: null,
     flagEmoji: "🇿🇦",
     name: "South Africa",

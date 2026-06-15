@@ -2,7 +2,10 @@ import { describe, expect, it } from "vitest";
 
 import type { NormalizedFixture } from "@/lib/fixtures/types";
 import type { PublicDataRepository } from "@/lib/public-data/repository";
-import { getFeaturedMatchResponse } from "@/lib/public-data/service";
+import {
+  getFeaturedMatchResponse,
+  publicStateFor,
+} from "@/lib/public-data/service";
 import { staticPrediction } from "@/lib/static-match";
 
 function fixture(
@@ -80,6 +83,13 @@ describe("public featured-match service", () => {
     expect(response.prediction).toBeNull();
   });
 
+  it("closes prediction entry when kickoff passed before provider status updates", () => {
+    const delayed = fixture("scheduled");
+    delayed.kickoffAtUtc = "2026-06-11T18:00:00.000Z";
+
+    expect(publicStateFor(delayed, false, false, now)).toBe("in_progress");
+  });
+
   it("returns stale and tournament-complete states explicitly", async () => {
     const stale = await getFeaturedMatchResponse(
       repository([fixture("scheduled", "2026-06-11T17:00:00.000Z")]),
@@ -113,5 +123,20 @@ describe("public featured-match service", () => {
       "https://crests.football-data.org/10.svg",
     );
     expect(response.match?.teamB.flagAssetUrl).toBeNull();
+  });
+
+  it("adds the current FIFA ranking snapshot to public teams", async () => {
+    const ranked = fixture("scheduled");
+    if (ranked.teamA) ranked.teamA.fifaCode = "BEL";
+    if (ranked.teamB) ranked.teamB.fifaCode = "EGY";
+
+    const response = await getFeaturedMatchResponse(
+      repository([ranked]),
+      now,
+      30,
+    );
+
+    expect(response.match?.teamA.fifaRank).toBe(9);
+    expect(response.match?.teamB.fifaRank).toBe(29);
   });
 });

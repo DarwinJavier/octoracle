@@ -41,4 +41,22 @@ describe("PredictionPanel", () => {
     );
     expect(screen.getByRole("heading", { name: "Draw" })).toBeInTheDocument();
   });
+
+  it("labels an active match as closed and invites the next reveal", () => {
+    render(
+      <PredictionPanel
+        isInProgress
+        match={staticMatch}
+        prediction={{ ...staticPrediction, status: "frozen" }}
+        revealed
+      />,
+    );
+
+    expect(screen.getByText("The prediction was")).toBeInTheDocument();
+    expect(
+      screen.getByRole("link", {
+        name: "Reveal a prediction for the next match",
+      }),
+    ).toHaveAttribute("href", "#games-today");
+  });
 });

@@ -141,6 +141,15 @@ Layer order:
 6. semantic HTML interface outside the canvas
 ```
 
+### Interface illustrations
+
+| Filename                     | Purpose                                                       | Transparency |              Logical display size | Anchor |
+| ---------------------------- | ------------------------------------------------------------- | -----------: | --------------------------------: | -----: |
+| `octopus-sleeping-scene.png` | Closed-match illustration when no pre-match prediction exists |       Opaque | Responsive 16:9 panel, max 1600px |    N/A |
+
+This illustration is semantic HTML outside the Phaser canvas. Preserve its
+source aspect ratio and use it only for the closed in-progress state.
+
 ---
 
 ## Screen placement guidance
@@ -230,6 +239,8 @@ public/
     backgrounds/
       aquarium-far-background.png
       aquarium-midground-ruins.png
+    illustrations/
+      octopus-sleeping-scene.png
     overlays/
       aquarium-glass-overlay.png
 ```

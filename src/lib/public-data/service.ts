@@ -1,4 +1,5 @@
 import { resolveFeaturedMatch } from "@/lib/fixtures/resolver";
+import { fifaRankForCode } from "@/lib/fixtures/fifa-rankings";
 import type { NormalizedFixture, NormalizedTeam } from "@/lib/fixtures/types";
 import type { PublicDataRepository } from "@/lib/public-data/repository";
 import {
@@ -35,6 +36,7 @@ function publicTeam(
   return {
     id: team?.providerId ?? `placeholder-${side}`,
     fifaCode,
+    fifaRank: fifaRankForCode(fifaCode),
     flagAssetUrl,
     flagEmoji: emojiFor(fifaCode),
     name: team?.name ?? placeholder ?? `Team ${side} TBD`,
@@ -62,10 +64,17 @@ export function publicStateFor(
   fixture: NormalizedFixture,
   hasPrediction: boolean,
   stale: boolean,
+  now = new Date(),
 ): PublicExperienceState {
   if (stale) return "stale";
   if (FINISHED.has(fixture.status)) return "finished";
   if (["live", "halftime", "suspended"].includes(fixture.status))
+    return "in_progress";
+  if (
+    fixture.status === "scheduled" &&
+    fixture.kickoffAtUtc &&
+    now.getTime() >= Date.parse(fixture.kickoffAtUtc)
+  )
     return "in_progress";
   return hasPrediction ? "upcoming" : "not_ready";
 }
@@ -98,6 +107,7 @@ export async function getFeaturedMatchResponse(
       resolution.match,
       prediction !== null,
       resolution.stale,
+      now,
     ),
     match,
     prediction,

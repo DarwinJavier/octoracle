@@ -16,6 +16,7 @@ export const publicTeamSchema = z
   .object({
     id: z.string().min(1),
     fifaCode: z.string().min(2).max(4),
+    fifaRank: z.number().int().positive().nullable().default(null),
     flagAssetUrl: z.string().url().nullable(),
     flagEmoji: z.string(),
     name: z.string().min(1),

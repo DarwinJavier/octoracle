@@ -2,6 +2,7 @@ import { describe, expect, it } from "vitest";
 
 import type { NormalizedFixture } from "@/lib/fixtures/types";
 import {
+  buildDuePredictions,
   buildLivePrediction,
   type PredictionBuildRepository,
 } from "@/lib/prediction/live";
@@ -128,5 +129,55 @@ describe("live prediction build", () => {
       teamAHistory: ["history-1"],
       teamBHistory: [],
     });
+  });
+
+  it("publishes every due candidate through the protected build flow", async () => {
+    const repository = new MemoryRepository() as MemoryRepository & {
+      listPredictionBuildCandidates: () => Promise<string[]>;
+    };
+    repository.listPredictionBuildCandidates = async () => [
+      predictionInput().matchId,
+    ];
+
+    const result = await buildDuePredictions(
+      {
+        async fetchCompletedTeamMatches(teamProviderId) {
+          return teamProviderId === "provider-a" ? [historyFixture] : [];
+        },
+      },
+      repository,
+      new Date("2026-06-11T17:00:00.000Z"),
+    );
+
+    expect(result).toEqual({
+      built: [predictionInput().matchId],
+      failed: [],
+    });
+    expect(repository.snapshot?.inputHash).toBeTruthy();
+  });
+
+  it("bounds each sync batch so scheduled builds finish reliably", async () => {
+    const repository = new MemoryRepository() as MemoryRepository & {
+      listPredictionBuildCandidates: () => Promise<string[]>;
+    };
+    const matchIds = Array.from(
+      { length: 6 },
+      (_, index) =>
+        `00000000-0000-4000-8000-${String(index + 1).padStart(12, "0")}`,
+    );
+    repository.listPredictionBuildCandidates = async () => matchIds;
+
+    const result = await buildDuePredictions(
+      {
+        async fetchCompletedTeamMatches() {
+          return [];
+        },
+      },
+      repository,
+      new Date("2026-06-11T17:00:00.000Z"),
+    );
+
+    expect(result.built).toHaveLength(4);
+    expect(result.failed).toHaveLength(0);
   });
 });

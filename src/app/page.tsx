@@ -5,6 +5,7 @@ import { MatchCard } from "@/components/match/MatchCard";
 import { DailyMatchSelector } from "@/components/match/DailyMatchSelector";
 import { StatusNotice } from "@/components/ui/StatusNotice";
 import { AccuracyHistory } from "@/components/prediction/AccuracyHistory";
+import { ClosedMatchNotice } from "@/components/prediction/ClosedMatchNotice";
 import { CompletedMatchComparison } from "@/components/prediction/CompletedMatchComparison";
 import { demoHistory, loadPredictionHistory } from "@/lib/history/load";
 import {
@@ -77,6 +78,7 @@ export default async function Home({ searchParams }: HomeProps) {
         response.state !== "finished" ? (
           <AquariumExperience
             forceAssetFailure={params.animation === "error"}
+            isInProgress={response.state === "in_progress"}
             isPreview={response.dataSource === "provider_preview"}
             match={response.match}
             prediction={response.prediction}
@@ -88,6 +90,8 @@ export default async function Home({ searchParams }: HomeProps) {
           >
             <p>The octopus is still thinking. Check again later.</p>
           </section>
+        ) : response.match && response.state === "in_progress" ? (
+          <ClosedMatchNotice />
         ) : null}
         {response.match && response.result && response.state === "finished" ? (
           <CompletedMatchComparison
@@ -99,11 +103,30 @@ export default async function Home({ searchParams }: HomeProps) {
         <AccuracyHistory history={history} />
 
         <footer className="disclaimer">
-          <strong>For entertainment and sports analysis only.</strong>
-          <span>
-            Predictions express uncertainty. They are not guarantees or wagering
-            advice.
-          </span>
+          <div>
+            <strong>Created by Darwin Hernandez</strong>
+            <span>For entertainment purposes only.</span>
+            <span>
+              Predictions express uncertainty. They are not guarantees or
+              wagering advice.
+            </span>
+          </div>
+          <nav aria-label="Project and tournament links">
+            <a
+              href="https://darwinhernandez.com"
+              target="_blank"
+              rel="noreferrer"
+            >
+              More info: darwinhernandez.com
+            </a>
+            <a
+              href="https://www.fifa.com/en/tournaments/mens/worldcup/canadamexicousa2026/scores-fixtures"
+              target="_blank"
+              rel="noreferrer"
+            >
+              Official FIFA calendar and scores
+            </a>
+          </nav>
         </footer>
       </div>
     </main>

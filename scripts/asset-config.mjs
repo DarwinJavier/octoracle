@@ -39,10 +39,16 @@ function entries(files, directory, width, height, transparency) {
   return files.map((filename) => ({
     filename,
     directory,
-    sourceWidth:
-      directory === "backgrounds" || directory === "overlays" ? 1672 : 1254,
-    sourceHeight:
-      directory === "backgrounds" || directory === "overlays" ? 941 : 1254,
+    sourceWidth: ["backgrounds", "illustrations", "overlays"].includes(
+      directory,
+    )
+      ? 1672
+      : 1254,
+    sourceHeight: ["backgrounds", "illustrations", "overlays"].includes(
+      directory,
+    )
+      ? 941
+      : 1254,
     runtimeMaxWidth: width,
     runtimeMaxHeight: height,
     transparency,
@@ -73,6 +79,13 @@ export const assetConfig = [
     1600,
     900,
     "transparent",
+  ),
+  ...entries(
+    ["octopus-sleeping-scene.png"],
+    "illustrations",
+    1600,
+    900,
+    "opaque",
   ),
   ...entries(overlays, "overlays", 1600, 900, "transparent"),
 ];

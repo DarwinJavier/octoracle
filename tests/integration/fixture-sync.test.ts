@@ -50,6 +50,7 @@ class MemoryRepository implements FixtureRepository {
   runs = new Map<string, SyncResult>();
   teamWrites = 0;
   fixtureWrites = 0;
+  predictionWrites = 0;
   lockCalls = 0;
   failedRuns = 0;
 
@@ -67,6 +68,9 @@ class MemoryRepository implements FixtureRepository {
   async upsertFixtures(fixtures: NormalizedFixture[]) {
     this.fixtureWrites += fixtures.length;
     return fixtures.length;
+  }
+  async backfillRecordedPredictions() {
+    return this.predictionWrites;
   }
   async recordCompletedRun(result: SyncResult) {
     this.runs.set(result.runKey, result);
@@ -95,6 +99,21 @@ describe("fixture synchronization", () => {
     expect(repository.lockCalls).toBe(1);
     expect(repository.teamWrites).toBe(2);
     expect(repository.fixtureWrites).toBe(1);
+  });
+
+  it("counts reviewed prediction backfills without changing fixture reads", async () => {
+    const repository = new MemoryRepository();
+    repository.predictionWrites = 2;
+    const provider: FixtureProvider = {
+      fetchFixtures: async () => [normalizedFixture()],
+    };
+
+    const result = await syncFixtures(provider, repository, "fixture-run-003");
+
+    expect(result).toMatchObject({
+      recordsRead: 1,
+      recordsWritten: 5,
+    });
   });
 
   it("does not write or record success when the provider is unavailable", async () => {

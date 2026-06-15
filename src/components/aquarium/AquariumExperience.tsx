@@ -10,11 +10,13 @@ type ExperienceStatus = "loading" | "ready" | "running" | "complete" | "error";
 
 export function AquariumExperience({
   forceAssetFailure = false,
+  isInProgress = false,
   isPreview = false,
   match,
   prediction,
 }: {
   forceAssetFailure?: boolean;
+  isInProgress?: boolean;
   isPreview?: boolean;
   match: StaticMatch;
   prediction: StaticPrediction;
@@ -25,7 +27,7 @@ export function AquariumExperience({
   const [animationState, setAnimationState] = useState<AquariumState>("idle");
   const [errorMessage, setErrorMessage] = useState("");
   const [reducedMotion, setReducedMotion] = useState(false);
-  const [revealed, setRevealed] = useState(false);
+  const [revealed, setRevealed] = useState(isInProgress);
   const [status, setStatus] = useState<ExperienceStatus>("loading");
 
   useEffect(() => {
@@ -59,6 +61,7 @@ export function AquariumExperience({
           setAnimationState("complete");
           setRevealed(true);
           setStatus("complete");
+          if (isInProgress) return;
           window.setTimeout(() => {
             predictionRef.current?.scrollIntoView({
               behavior: "smooth",
@@ -70,7 +73,14 @@ export function AquariumExperience({
           setErrorMessage(message);
           setStatus("error");
         },
-        onReady: () => setStatus("ready"),
+        onReady: () => {
+          if (isInProgress) {
+            setStatus("complete");
+            window.setTimeout(() => controllerRef.current?.skip(), 0);
+            return;
+          }
+          setStatus("ready");
+        },
         onStateChange: setAnimationState,
         outcome: prediction.selectedOutcome,
         predictedScoreA90: prediction.predictedScoreA90,
@@ -101,7 +111,7 @@ export function AquariumExperience({
       controllerRef.current?.destroy();
       controllerRef.current = null;
     };
-  }, [forceAssetFailure, match, prediction]);
+  }, [forceAssetFailure, isInProgress, match, prediction]);
 
   const start = () => {
     setRevealed(false);
@@ -149,7 +159,11 @@ export function AquariumExperience({
         <div className="section-heading">
           <div>
             <p>The prediction ritual</p>
-            <h2 id="aquarium-heading">The tank is ready</h2>
+            <h2 id="aquarium-heading">
+              {isInProgress
+                ? "The octopus has already spoken"
+                : "The tank is ready"}
+            </h2>
           </div>
           <span
             className="sr-only"
@@ -186,17 +200,18 @@ export function AquariumExperience({
 
         <div className="ritual-actions ritual-actions-compact">
           <div className="ritual-buttons">
-            {status === "ready" || (status === "error" && !revealed) ? (
+            {!isInProgress &&
+            (status === "ready" || (status === "error" && !revealed)) ? (
               <button type="button" className="primary-button" onClick={start}>
                 Ask the Octopus
               </button>
             ) : null}
-            {status === "running" ? (
+            {!isInProgress && status === "running" ? (
               <button type="button" className="secondary-button" onClick={skip}>
                 Skip animation
               </button>
             ) : null}
-            {status === "complete" ? (
+            {!isInProgress && status === "complete" ? (
               <button
                 type="button"
                 className="secondary-button"
@@ -211,6 +226,7 @@ export function AquariumExperience({
 
       <div ref={predictionRef}>
         <PredictionPanel
+          isInProgress={isInProgress}
           match={match}
           isPreview={isPreview}
           prediction={prediction}

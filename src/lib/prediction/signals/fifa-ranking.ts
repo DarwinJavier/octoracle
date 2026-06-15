@@ -4,6 +4,7 @@ import {
   teamSignalsSchema,
   type PredictionInput,
 } from "@/lib/prediction/types";
+import { canonicalFifaCode } from "@/lib/fixtures/fifa-rankings";
 
 const rankingRowSchema = z
   .object({
@@ -28,6 +29,10 @@ export type FifaRankingSignal = {
   recentForm: number;
   publishedAt: string;
 };
+
+export function fifaRankingCodeFor(providerCode: string | null) {
+  return canonicalFifaCode(providerCode);
+}
 
 function clamp(value: number) {
   return Math.min(1, Math.max(0, value));

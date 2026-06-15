@@ -23,7 +23,7 @@ export function MatchCard({
       </div>
       <h1 id="next-match-heading">
         {state === "in_progress"
-          ? "Featured match"
+          ? "Match in progress"
           : state === "finished"
             ? "Completed match"
             : "Next match"}

@@ -16,9 +16,9 @@ const notices = {
       "Stored fixture data could not be read safely. No match or prediction has been fabricated.",
   },
   in_progress: {
-    title: "Match in progress",
+    title: "OctoOracle is closed for this match",
     message:
-      "The prediction is frozen. No new prediction can be generated after kickoff.",
+      "The match is in progress. The frozen pre-match prediction remains visible, and no new prediction can be generated.",
   },
   finished: {
     title: "Match finished",
@@ -42,12 +42,18 @@ export function StatusNotice({
         <strong>
           {response.state === "finished"
             ? "Recorded prediction comparison"
-            : "Live provider preview"}
+            : response.state === "in_progress"
+              ? "Match in progress"
+              : "Live provider preview"}
         </strong>
         <span>
           {response.state === "finished"
             ? "Showing the real provider result beside the prediction recorded before kickoff."
-            : response.warning}
+            : response.state === "in_progress"
+              ? response.prediction
+                ? "OctoOracle is closed for this match because play is underway. Its frozen pre-match prediction remains visible below."
+                : "OctoOracle is closed for this match because play is underway. No pre-match prediction was recorded."
+              : response.warning}
         </span>
       </aside>
     );

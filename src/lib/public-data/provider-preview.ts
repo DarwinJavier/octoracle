@@ -7,6 +7,7 @@ import { buildPrediction } from "@/lib/prediction/engine";
 import { MIN_HISTORY_MATCHES } from "@/lib/prediction/config";
 import {
   applyFifaRankingSignal,
+  fifaRankingCodeFor,
   FifaRankingProvider,
 } from "@/lib/prediction/signals/fifa-ranking";
 import { calculateHistorySignals } from "@/lib/prediction/signals/history";
@@ -73,8 +74,12 @@ async function previewPrediction(
     historyOrEmpty(provider, fixture.teamB.providerId, fixture.kickoffAtUtc),
     new FifaRankingProvider().fetchRankings().catch(() => new Map()),
   ]);
-  const teamARanking = rankings.get(fixture.teamA.fifaCode ?? "");
-  const teamBRanking = rankings.get(fixture.teamB.fifaCode ?? "");
+  const teamARanking = rankings.get(
+    fifaRankingCodeFor(fixture.teamA.fifaCode) ?? "",
+  );
+  const teamBRanking = rankings.get(
+    fifaRankingCodeFor(fixture.teamB.fifaCode) ?? "",
+  );
   const teamAHasHistory = teamAHistory.length >= MIN_HISTORY_MATCHES;
   const teamBHasHistory = teamBHistory.length >= MIN_HISTORY_MATCHES;
   if (
@@ -110,6 +115,10 @@ async function previewPrediction(
     kickoffAtUtc: fixture.kickoffAtUtc,
   };
   const prediction = buildPrediction(input);
+  const rankingContext =
+    teamARanking && teamBRanking
+      ? `FIFA ranks ${fixture.teamA.name} #${teamARanking.rank} and ${fixture.teamB.name} #${teamBRanking.rank}. `
+      : "";
 
   return publicPredictionSchema.parse({
     animationSeed: prediction.animationSeed,
@@ -126,7 +135,7 @@ async function previewPrediction(
           : null,
     predictedScoreA90: prediction.predictedScoreA90,
     predictedScoreB90: prediction.predictedScoreB90,
-    publicExplanation: prediction.publicExplanation,
+    publicExplanation: `${rankingContext}${prediction.publicExplanation}`,
     reasonCodes: prediction.reasonCodes,
     selectedOutcome: prediction.selectedOutcome,
     sourceCount: prediction.sourceCount,
@@ -234,6 +243,7 @@ export async function loadProviderPreview(
       featured,
       prediction !== null,
       selectedMatch ? false : resolution.stale,
+      now,
     ),
     match: toPublicMatch(featured),
     prediction,

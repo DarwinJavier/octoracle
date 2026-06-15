@@ -19,9 +19,19 @@ describe("Home", () => {
     expect(
       screen.getByRole("img", { name: "South Africa flag" }),
     ).toBeInTheDocument();
+    expect(screen.getByText("Created by Darwin Hernandez")).toBeInTheDocument();
     expect(
-      screen.getByText(/entertainment and sports analysis only/i),
+      screen.getByText("For entertainment purposes only."),
     ).toBeInTheDocument();
+    expect(
+      screen.getByRole("link", { name: "More info: darwinhernandez.com" }),
+    ).toHaveAttribute("href", "https://darwinhernandez.com");
+    expect(
+      screen.getByRole("link", { name: "Official FIFA calendar and scores" }),
+    ).toHaveAttribute(
+      "href",
+      "https://www.fifa.com/en/tournaments/mens/worldcup/canadamexicousa2026/scores-fixtures",
+    );
     expect(
       screen.getByRole("link", { name: "Previous results" }),
     ).toHaveAttribute("href", "#accuracy-history");
@@ -78,6 +88,30 @@ describe("Home", () => {
       }),
     );
 
+    expect(
+      screen.queryByRole("button", { name: "Ask the Octopus" }),
+    ).not.toBeInTheDocument();
+  });
+
+  it("keeps the tank and frozen prediction visible without a new ritual after kickoff", async () => {
+    render(
+      await Home({
+        searchParams: Promise.resolve({
+          animation: "error",
+          state: "in_progress",
+        }),
+      }),
+    );
+
+    expect(
+      screen.getByRole("heading", {
+        name: "The octopus has already spoken",
+      }),
+    ).toBeInTheDocument();
+    expect(
+      screen.getByRole("heading", { name: "The Octopus already spoke" }),
+    ).toBeInTheDocument();
+    expect(screen.getByText(/Mexico 2.*1 South Africa/)).toBeInTheDocument();
     expect(
       screen.queryByRole("button", { name: "Ask the Octopus" }),
     ).not.toBeInTheDocument();

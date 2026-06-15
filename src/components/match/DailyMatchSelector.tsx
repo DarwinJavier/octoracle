@@ -16,7 +16,7 @@ export function DailyMatchSelector({
   selectedMatchId: string | null;
 }) {
   return (
-    <nav className="daily-matches" aria-label="Games today">
+    <nav id="games-today" className="daily-matches" aria-label="Games today">
       <div className="section-heading">
         <div>
           <p>Choose a prediction</p>

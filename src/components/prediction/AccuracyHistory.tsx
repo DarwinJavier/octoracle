@@ -36,30 +36,41 @@ export function AccuracyHistory({
               <dd>{percent(history.exactScoreAccuracy)}</dd>
             </div>
           </dl>
-          <div className="history-list">
-            {history.items.map((item) => (
-              <article
-                key={`${item.match.id}-${item.prediction.version}`}
-                className="prediction-explanation"
-              >
-                <h3>
-                  {item.match.teamA.shortName} {item.result.scoreA90}–
-                  {item.result.scoreB90} {item.match.teamB.shortName}
-                </h3>
-                <p>
-                  Predicted {item.prediction.predictedScoreA90}–
-                  {item.prediction.predictedScoreB90}. Outcome{" "}
-                  {item.accuracy.outcomeCorrect ? "correct" : "incorrect"};
-                  exact score{" "}
-                  {item.accuracy.exactScoreCorrect ? "correct" : "incorrect"}.
-                  {item.result.scoreAFinal !== item.result.scoreA90 ||
-                  item.result.scoreBFinal !== item.result.scoreB90
-                    ? ` Final resolution ${item.result.scoreAFinal}–${item.result.scoreBFinal}.`
-                    : ""}
-                </p>
-              </article>
-            ))}
-          </div>
+          <details className="history-details">
+            <summary>
+              <span className="history-show-label">
+                Show previous matches ({history.total})
+              </span>
+              <span className="history-hide-label">Hide previous matches</span>
+              <span className="history-chevron" aria-hidden="true">
+                +
+              </span>
+            </summary>
+            <div className="history-list">
+              {history.items.map((item) => (
+                <article
+                  key={`${item.match.id}-${item.prediction.version}`}
+                  className="prediction-explanation"
+                >
+                  <h3>
+                    {item.match.teamA.shortName} {item.result.scoreA90}–
+                    {item.result.scoreB90} {item.match.teamB.shortName}
+                  </h3>
+                  <p>
+                    Predicted {item.prediction.predictedScoreA90}–
+                    {item.prediction.predictedScoreB90}. Outcome{" "}
+                    {item.accuracy.outcomeCorrect ? "correct" : "incorrect"};
+                    exact score{" "}
+                    {item.accuracy.exactScoreCorrect ? "correct" : "incorrect"}.
+                    {item.result.scoreAFinal !== item.result.scoreA90 ||
+                    item.result.scoreBFinal !== item.result.scoreB90
+                      ? ` Final resolution ${item.result.scoreAFinal}–${item.result.scoreBFinal}.`
+                      : ""}
+                  </p>
+                </article>
+              ))}
+            </div>
+          </details>
         </>
       )}
     </section>

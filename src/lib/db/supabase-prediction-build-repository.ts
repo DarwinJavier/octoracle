@@ -46,6 +46,19 @@ const observationRowsSchema = z.array(
   }),
 );
 
+const candidateMatchRowsSchema = z.array(
+  z.object({
+    id: z.string().uuid(),
+  }),
+);
+
+const candidatePredictionRowsSchema = z.array(
+  z.object({
+    match_id: z.string().uuid(),
+    generated_at: z.string().datetime(),
+  }),
+);
+
 type Options = {
   supabaseUrl: string;
   serviceRoleKey: string;
@@ -147,6 +160,44 @@ export class SupabasePredictionBuildRepository implements PredictionBuildReposit
         modelVersion: row.model_version,
       }),
     );
+  }
+
+  async listPredictionBuildCandidates(
+    now: Date,
+    horizonHours: number,
+    refreshHours: number,
+  ) {
+    const horizon = new Date(now.getTime() + horizonHours * 60 * 60_000);
+    const matches = candidateMatchRowsSchema.parse(
+      await (
+        await this.request(
+          `matches?select=id&status=eq.scheduled&team_a_id=not.is.null&team_b_id=not.is.null&kickoff_at_utc=gt.${encodeURIComponent(now.toISOString())}&kickoff_at_utc=lte.${encodeURIComponent(horizon.toISOString())}&order=kickoff_at_utc.asc`,
+        )
+      ).json(),
+    );
+    if (matches.length === 0) return [];
+
+    const matchFilter = matches.map(({ id }) => `"${id}"`).join(",");
+    const predictions = candidatePredictionRowsSchema.parse(
+      await (
+        await this.request(
+          `predictions?select=match_id,generated_at&match_id=in.(${encodeURIComponent(matchFilter)})&status=in.(published,frozen)&order=generated_at.desc`,
+        )
+      ).json(),
+    );
+    const latestByMatch = new Map<string, number>();
+    for (const prediction of predictions) {
+      if (!latestByMatch.has(prediction.match_id)) {
+        latestByMatch.set(
+          prediction.match_id,
+          Date.parse(prediction.generated_at),
+        );
+      }
+    }
+    const refreshBefore = now.getTime() - refreshHours * 60 * 60_000;
+    return matches
+      .filter(({ id }) => (latestByMatch.get(id) ?? 0) <= refreshBefore)
+      .map(({ id }) => id);
   }
 
   async saveSignalSnapshot(
