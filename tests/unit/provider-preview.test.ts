@@ -11,6 +11,7 @@ import {
 } from "../fixtures/football-data-fixtures";
 import {
   recordedPreviewPredictionFor,
+  recordedPreviewPredictionsForEasternDay,
   recordedPreviewPredictionIds,
 } from "@/lib/prediction/preview-ledger";
 
@@ -65,6 +66,29 @@ describe("football-data.org provider preview", () => {
         "537357",
         "537352",
         "537358",
+        "537369",
+        "537363",
+        "537370",
+        "537364",
+      ]),
+    );
+  });
+
+  it("keeps today's reviewed forecasts in a private daily recovery table", () => {
+    expect(
+      recordedPreviewPredictionsForEasternDay("2026-06-15").map(
+        ({ matchProviderId, prediction }) => ({
+          matchProviderId,
+          score: `${prediction.predictedScoreA90}-${prediction.predictedScoreB90}`,
+          outcome: prediction.selectedOutcome,
+        }),
+      ),
+    ).toEqual(
+      expect.arrayContaining([
+        { matchProviderId: "537369", score: "2-0", outcome: "team_a" },
+        { matchProviderId: "537363", score: "2-1", outcome: "team_a" },
+        { matchProviderId: "537370", score: "0-1", outcome: "team_b" },
+        { matchProviderId: "537364", score: "2-0", outcome: "team_a" },
       ]),
     );
   });
@@ -200,6 +224,71 @@ describe("football-data.org provider preview", () => {
     expect(response.prediction?.predictedScoreA90).toBeGreaterThan(
       response.prediction?.predictedScoreB90 ?? Number.POSITIVE_INFINITY,
     );
+  });
+
+  it("uses Uruguay's official ranking despite the provider-specific URY code", async () => {
+    const saudiUruguay = {
+      ...footballDataScheduledFixture,
+      id: 537370,
+      homeTeam: {
+        ...footballDataScheduledFixture.homeTeam,
+        id: 801,
+        name: "Saudi Arabia",
+        shortName: "Saudi Arabia",
+        tla: "KSA",
+      },
+      awayTeam: {
+        ...footballDataScheduledFixture.awayTeam,
+        id: 758,
+        name: "Uruguay",
+        shortName: "Uruguay",
+        tla: "URY",
+      },
+    };
+    vi.stubGlobal(
+      "fetch",
+      vi.fn(async (request: RequestInfo | URL) => {
+        const url = String(request);
+        if (url.includes("api.fifa.com/api/v3/rankings")) {
+          return Response.json({
+            Results: [
+              {
+                IdCountry: "URU",
+                Rank: 16,
+                DecimalTotalPoints: 1673,
+                DecimalPrevPoints: 1673,
+                PubDate: "2026-06-11T10:00:00+00:00",
+              },
+              {
+                IdCountry: "KSA",
+                Rank: 61,
+                DecimalTotalPoints: 1424,
+                DecimalPrevPoints: 1421,
+                PubDate: "2026-06-11T10:00:00+00:00",
+              },
+            ],
+          });
+        }
+        return Response.json({
+          matches: url.includes("/competitions/WC/matches")
+            ? [saudiUruguay]
+            : [],
+        });
+      }),
+    );
+
+    const response = await loadProviderPreview(
+      "test-key",
+      new Date("2026-06-11T12:00:00.000Z"),
+      1_000_000,
+    );
+
+    expect(response.state).toBe("upcoming");
+    expect(response.prediction).toMatchObject({
+      selectedOutcome: "team_b",
+      predictedScoreA90: 0,
+      predictedScoreB90: 1,
+    });
   });
 
   it("selects a requested fixture and lists every match on its Eastern day", async () => {

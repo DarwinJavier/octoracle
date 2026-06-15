@@ -29,6 +29,16 @@ export type FifaRankingSignal = {
   publishedAt: string;
 };
 
+const FIFA_CODE_ALIASES: Record<string, string> = {
+  URY: "URU",
+};
+
+export function fifaRankingCodeFor(providerCode: string | null) {
+  if (!providerCode) return null;
+  const code = providerCode.toUpperCase();
+  return FIFA_CODE_ALIASES[code] ?? code;
+}
+
 function clamp(value: number) {
   return Math.min(1, Math.max(0, value));
 }

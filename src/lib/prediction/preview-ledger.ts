@@ -201,6 +201,86 @@ const RECORDED_PREVIEW_PREDICTIONS = {
     teamBWinProbability: 0.26,
     version: 1,
   }),
+  "537369": publicPredictionSchema.parse({
+    animationSeed: "spain-cape-verde-preview-v1",
+    confidence: "high",
+    drawProbability: 0.16,
+    freezeAt: "2026-06-15T16:00:00.000Z",
+    frozenAt: null,
+    generatedAt: "2026-06-15T11:30:00.000Z",
+    predictedAdvancingTeamId: null,
+    predictedScoreA90: 2,
+    predictedScoreB90: 0,
+    publicExplanation:
+      "The reviewed forecast favored Spain clearly while retaining uncertainty around the final margin.",
+    reasonCodes: ["reviewed_forecast", "stronger_forecast"],
+    selectedOutcome: "team_a",
+    sourceCount: 1,
+    status: "published",
+    teamAWinProbability: 0.68,
+    teamBWinProbability: 0.16,
+    version: 1,
+  }),
+  "537363": publicPredictionSchema.parse({
+    animationSeed: "belgium-egypt-reviewed-v1",
+    confidence: "medium",
+    drawProbability: 0.25,
+    freezeAt: "2026-06-15T19:00:00.000Z",
+    frozenAt: null,
+    generatedAt: "2026-06-15T11:30:00.000Z",
+    predictedAdvancingTeamId: null,
+    predictedScoreA90: 2,
+    predictedScoreB90: 1,
+    publicExplanation:
+      "The reviewed forecast gives Belgium the stronger outlook while preserving meaningful Egypt and draw chances.",
+    reasonCodes: ["reviewed_forecast", "stronger_forecast"],
+    selectedOutcome: "team_a",
+    sourceCount: 1,
+    status: "published",
+    teamAWinProbability: 0.52,
+    teamBWinProbability: 0.23,
+    version: 1,
+  }),
+  "537370": publicPredictionSchema.parse({
+    animationSeed: "saudi-arabia-uruguay-preview-v1",
+    confidence: "medium",
+    drawProbability: 0.27,
+    freezeAt: "2026-06-15T22:00:00.000Z",
+    frozenAt: null,
+    generatedAt: "2026-06-15T11:30:00.000Z",
+    predictedAdvancingTeamId: null,
+    predictedScoreA90: 0,
+    predictedScoreB90: 1,
+    publicExplanation:
+      "The validated ranking baseline gives Uruguay a narrow edge while preserving meaningful Saudi Arabia and draw chances.",
+    reasonCodes: ["fifa_ranking", "narrow_edge"],
+    selectedOutcome: "team_b",
+    sourceCount: 1,
+    status: "published",
+    teamAWinProbability: 0.27,
+    teamBWinProbability: 0.46,
+    version: 1,
+  }),
+  "537364": publicPredictionSchema.parse({
+    animationSeed: "iran-new-zealand-preview-v1",
+    confidence: "high",
+    drawProbability: 0.19,
+    freezeAt: "2026-06-16T01:00:00.000Z",
+    frozenAt: null,
+    generatedAt: "2026-06-15T11:30:00.000Z",
+    predictedAdvancingTeamId: null,
+    predictedScoreA90: 2,
+    predictedScoreB90: 0,
+    publicExplanation:
+      "The reviewed forecast favored Iran clearly while retaining uncertainty around the final margin.",
+    reasonCodes: ["reviewed_forecast", "stronger_forecast"],
+    selectedOutcome: "team_a",
+    sourceCount: 1,
+    status: "published",
+    teamAWinProbability: 0.64,
+    teamBWinProbability: 0.17,
+    version: 1,
+  }),
 } as const;
 
 export function recordedPreviewPredictionIds() {
@@ -213,4 +293,22 @@ export function recordedPreviewPredictionFor(matchProviderId: string) {
       matchProviderId as keyof typeof RECORDED_PREVIEW_PREDICTIONS
     ] ?? null
   );
+}
+
+export function recordedPreviewPredictionsForEasternDay(day: string) {
+  const formatter = new Intl.DateTimeFormat("en-CA", {
+    day: "2-digit",
+    month: "2-digit",
+    timeZone: "America/New_York",
+    year: "numeric",
+  });
+  return Object.entries(RECORDED_PREVIEW_PREDICTIONS)
+    .filter(
+      ([, prediction]) =>
+        formatter.format(new Date(prediction.freezeAt)) === day,
+    )
+    .map(([matchProviderId, prediction]) => ({
+      matchProviderId,
+      prediction,
+    }));
 }

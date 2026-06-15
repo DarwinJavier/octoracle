@@ -2,6 +2,7 @@ import { describe, expect, it } from "vitest";
 
 import {
   applyFifaRankingSignal,
+  fifaRankingCodeFor,
   FifaRankingProvider,
   parseFifaRankingResponse,
 } from "@/lib/prediction/signals/fifa-ranking";
@@ -77,5 +78,11 @@ describe("FIFA ranking signals", () => {
     expect(() =>
       parseFifaRankingResponse({ Results: [{ Rank: "first" }] }),
     ).toThrow();
+  });
+
+  it("maps provider-specific Uruguay code to FIFA's ranking code", () => {
+    expect(fifaRankingCodeFor("URY")).toBe("URU");
+    expect(fifaRankingCodeFor("KSA")).toBe("KSA");
+    expect(fifaRankingCodeFor(null)).toBeNull();
   });
 });

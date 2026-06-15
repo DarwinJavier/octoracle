@@ -7,6 +7,7 @@ import { buildPrediction } from "@/lib/prediction/engine";
 import { MIN_HISTORY_MATCHES } from "@/lib/prediction/config";
 import {
   applyFifaRankingSignal,
+  fifaRankingCodeFor,
   FifaRankingProvider,
 } from "@/lib/prediction/signals/fifa-ranking";
 import { calculateHistorySignals } from "@/lib/prediction/signals/history";
@@ -73,8 +74,12 @@ async function previewPrediction(
     historyOrEmpty(provider, fixture.teamB.providerId, fixture.kickoffAtUtc),
     new FifaRankingProvider().fetchRankings().catch(() => new Map()),
   ]);
-  const teamARanking = rankings.get(fixture.teamA.fifaCode ?? "");
-  const teamBRanking = rankings.get(fixture.teamB.fifaCode ?? "");
+  const teamARanking = rankings.get(
+    fifaRankingCodeFor(fixture.teamA.fifaCode) ?? "",
+  );
+  const teamBRanking = rankings.get(
+    fifaRankingCodeFor(fixture.teamB.fifaCode) ?? "",
+  );
   const teamAHasHistory = teamAHistory.length >= MIN_HISTORY_MATCHES;
   const teamBHasHistory = teamBHistory.length >= MIN_HISTORY_MATCHES;
   if (
