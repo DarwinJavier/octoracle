@@ -27,6 +27,7 @@ The repository has completed Step 8. It includes deterministic fixture/result sy
 - `syncFixtures` upserts teams before matches, records sanitized job outcomes, and honors idempotency keys.
 - `SupabaseFixtureRepository` uses the server-only service role and an atomic, expiring `job_locks` row.
 - `POST /api/internal/sync-fixtures` requires bearer authentication, an idempotency key, a strict empty request body, and rate limiting.
+- After fixture writes, the protected sync publishes missing predictions within 48 hours of kickoff, refreshes eligible published predictions every three hours, and freezes due predictions. Public page requests remain read-only.
 
 ## Aquarium Animation
 

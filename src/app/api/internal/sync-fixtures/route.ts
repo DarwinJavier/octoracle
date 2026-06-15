@@ -1,8 +1,11 @@
 import { z } from "zod";
 
 import { SupabaseFixtureRepository } from "@/lib/db/supabase-fixture-repository";
+import { SupabasePredictionBuildRepository } from "@/lib/db/supabase-prediction-build-repository";
 import { FootballDataFixtureProvider } from "@/lib/fixtures/providers/football-data";
 import { syncFixtures } from "@/lib/fixtures/sync";
+import { buildDuePredictions } from "@/lib/prediction/live";
+import { freezeDuePredictions } from "@/lib/prediction/lifecycle";
 import {
   idempotencyKeySchema,
   isAuthorizedInternalRequest,
@@ -50,12 +53,25 @@ export async function POST(request: Request) {
   }
 
   try {
+    const provider = new FootballDataFixtureProvider({ apiKey });
     const result = await syncFixtures(
-      new FootballDataFixtureProvider({ apiKey }),
+      provider,
       new SupabaseFixtureRepository({ supabaseUrl, serviceRoleKey }),
       parsedRunKey.data,
     );
-    return json(result, result.status === "skipped" ? 200 : 201);
+    const predictionRepository = new SupabasePredictionBuildRepository({
+      supabaseUrl,
+      serviceRoleKey,
+    });
+    const predictionBuilds = await buildDuePredictions(
+      provider,
+      predictionRepository,
+    );
+    const predictionsFrozen = await freezeDuePredictions(predictionRepository);
+    return json(
+      { ...result, predictionBuilds, predictionsFrozen },
+      result.status === "skipped" ? 200 : 201,
+    );
   } catch (error) {
     console.error("fixture_sync_failed", {
       message: error instanceof Error ? error.message : "unknown_error",

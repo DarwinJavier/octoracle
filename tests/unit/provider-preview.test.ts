@@ -9,7 +9,10 @@ import {
   footballDataLiveFixture,
   footballDataScheduledFixture,
 } from "../fixtures/football-data-fixtures";
-import { recordedPreviewPredictionIds } from "@/lib/prediction/preview-ledger";
+import {
+  recordedPreviewPredictionFor,
+  recordedPreviewPredictionIds,
+} from "@/lib/prediction/preview-ledger";
 
 function completedHistory() {
   return [1, 2, 3].map((id) => ({
@@ -61,8 +64,18 @@ describe("football-data.org provider preview", () => {
         "537351",
         "537357",
         "537352",
+        "537358",
       ]),
     );
+  });
+
+  it("preserves the revealed Sweden one-nil prediction", () => {
+    expect(recordedPreviewPredictionFor("537358")).toMatchObject({
+      predictedScoreA90: 1,
+      predictedScoreB90: 0,
+      selectedOutcome: "team_a",
+      status: "frozen",
+    });
   });
 
   it("renders a deterministic MVP prediction from validated provider data", async () => {

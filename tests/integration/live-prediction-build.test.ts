@@ -2,6 +2,7 @@ import { describe, expect, it } from "vitest";
 
 import type { NormalizedFixture } from "@/lib/fixtures/types";
 import {
+  buildDuePredictions,
   buildLivePrediction,
   type PredictionBuildRepository,
 } from "@/lib/prediction/live";
@@ -128,5 +129,30 @@ describe("live prediction build", () => {
       teamAHistory: ["history-1"],
       teamBHistory: [],
     });
+  });
+
+  it("publishes every due candidate through the protected build flow", async () => {
+    const repository = new MemoryRepository() as MemoryRepository & {
+      listPredictionBuildCandidates: () => Promise<string[]>;
+    };
+    repository.listPredictionBuildCandidates = async () => [
+      predictionInput().matchId,
+    ];
+
+    const result = await buildDuePredictions(
+      {
+        async fetchCompletedTeamMatches(teamProviderId) {
+          return teamProviderId === "provider-a" ? [historyFixture] : [];
+        },
+      },
+      repository,
+      new Date("2026-06-11T17:00:00.000Z"),
+    );
+
+    expect(result).toEqual({
+      built: [predictionInput().matchId],
+      failed: [],
+    });
+    expect(repository.snapshot?.inputHash).toBeTruthy();
   });
 });

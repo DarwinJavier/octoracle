@@ -45,6 +45,14 @@ export type PredictionBuildRepository = PredictionRepository & {
   ): Promise<void>;
 };
 
+export type ScheduledPredictionBuildRepository = PredictionBuildRepository & {
+  listPredictionBuildCandidates(
+    now: Date,
+    horizonHours: number,
+    refreshHours: number,
+  ): Promise<string[]>;
+};
+
 function stageType(stage: string, groupCode: string | null) {
   return groupCode || stage.toLowerCase().includes("group")
     ? ("group" as const)
@@ -112,4 +120,25 @@ export async function buildLivePrediction(
     historyMatchesRead: teamAHistory.length + teamBHistory.length,
     sourceCount: consensus.sourceCount,
   };
+}
+
+export async function buildDuePredictions(
+  provider: PredictionHistoryProvider,
+  repository: ScheduledPredictionBuildRepository,
+  now = new Date(),
+) {
+  const matchIds = await repository.listPredictionBuildCandidates(now, 48, 3);
+  const built: string[] = [];
+  const failed: string[] = [];
+
+  for (const matchId of matchIds) {
+    try {
+      await buildLivePrediction(matchId, provider, repository, now);
+      built.push(matchId);
+    } catch {
+      failed.push(matchId);
+    }
+  }
+
+  return { built, failed };
 }

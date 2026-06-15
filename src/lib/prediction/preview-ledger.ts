@@ -181,6 +181,26 @@ const RECORDED_PREVIEW_PREDICTIONS = {
     teamBWinProbability: 0.46,
     version: 1,
   }),
+  "537358": publicPredictionSchema.parse({
+    animationSeed: "sweden-tunisia-preview-v1",
+    confidence: "medium",
+    drawProbability: 0.28,
+    freezeAt: "2026-06-15T02:00:00.000Z",
+    frozenAt: "2026-06-15T02:00:00.000Z",
+    generatedAt: "2026-06-15T01:30:00.000Z",
+    predictedAdvancingTeamId: null,
+    predictedScoreA90: 1,
+    predictedScoreB90: 0,
+    publicExplanation:
+      "The reviewed forecast gave Sweden a narrow edge while preserving meaningful draw and Tunisia chances.",
+    reasonCodes: ["reviewed_forecast", "narrow_edge"],
+    selectedOutcome: "team_a",
+    sourceCount: 0,
+    status: "frozen",
+    teamAWinProbability: 0.46,
+    teamBWinProbability: 0.26,
+    version: 1,
+  }),
 } as const;
 
 export function recordedPreviewPredictionIds() {
