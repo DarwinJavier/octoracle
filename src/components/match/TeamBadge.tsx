@@ -20,6 +20,9 @@ export function TeamBadge({ side, team }: { side: "A" | "B"; team: Team }) {
       )}
       <span className="team-code">{team.fifaCode}</span>
       <h3>{team.shortName}</h3>
+      {team.fifaRank ? (
+        <span className="team-rank">FIFA rank #{team.fifaRank}</span>
+      ) : null}
       <span className="team-side">Team {side}</span>
     </article>
   );

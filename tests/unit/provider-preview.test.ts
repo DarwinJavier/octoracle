@@ -87,7 +87,7 @@ describe("football-data.org provider preview", () => {
       expect.arrayContaining([
         { matchProviderId: "537369", score: "2-0", outcome: "team_a" },
         { matchProviderId: "537363", score: "2-1", outcome: "team_a" },
-        { matchProviderId: "537370", score: "0-1", outcome: "team_b" },
+        { matchProviderId: "537370", score: "0-2", outcome: "team_b" },
         { matchProviderId: "537364", score: "2-0", outcome: "team_a" },
       ]),
     );
@@ -287,7 +287,7 @@ describe("football-data.org provider preview", () => {
     expect(response.prediction).toMatchObject({
       selectedOutcome: "team_b",
       predictedScoreA90: 0,
-      predictedScoreB90: 1,
+      predictedScoreB90: 2,
     });
   });
 

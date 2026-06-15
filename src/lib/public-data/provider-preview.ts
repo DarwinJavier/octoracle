@@ -115,6 +115,10 @@ async function previewPrediction(
     kickoffAtUtc: fixture.kickoffAtUtc,
   };
   const prediction = buildPrediction(input);
+  const rankingContext =
+    teamARanking && teamBRanking
+      ? `FIFA ranks ${fixture.teamA.name} #${teamARanking.rank} and ${fixture.teamB.name} #${teamBRanking.rank}. `
+      : "";
 
   return publicPredictionSchema.parse({
     animationSeed: prediction.animationSeed,
@@ -131,7 +135,7 @@ async function previewPrediction(
           : null,
     predictedScoreA90: prediction.predictedScoreA90,
     predictedScoreB90: prediction.predictedScoreB90,
-    publicExplanation: prediction.publicExplanation,
+    publicExplanation: `${rankingContext}${prediction.publicExplanation}`,
     reasonCodes: prediction.reasonCodes,
     selectedOutcome: prediction.selectedOutcome,
     sourceCount: prediction.sourceCount,

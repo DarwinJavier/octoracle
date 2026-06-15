@@ -4,6 +4,7 @@ import {
   teamSignalsSchema,
   type PredictionInput,
 } from "@/lib/prediction/types";
+import { canonicalFifaCode } from "@/lib/fixtures/fifa-rankings";
 
 const rankingRowSchema = z
   .object({
@@ -29,14 +30,8 @@ export type FifaRankingSignal = {
   publishedAt: string;
 };
 
-const FIFA_CODE_ALIASES: Record<string, string> = {
-  URY: "URU",
-};
-
 export function fifaRankingCodeFor(providerCode: string | null) {
-  if (!providerCode) return null;
-  const code = providerCode.toUpperCase();
-  return FIFA_CODE_ALIASES[code] ?? code;
+  return canonicalFifaCode(providerCode);
 }
 
 function clamp(value: number) {

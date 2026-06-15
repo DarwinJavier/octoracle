@@ -29,6 +29,7 @@ The repository has completed Step 8. It includes deterministic fixture/result sy
 - `POST /api/internal/sync-fixtures` requires bearer authentication, an idempotency key, a strict empty request body, and rate limiting.
 - After fixture writes, the protected sync publishes the four earliest due predictions within 48 hours of kickoff, refreshes eligible published predictions every three hours, and freezes due predictions. Bounded batches keep jobs within provider and execution limits; later syncs continue with remaining matches. Public page requests remain read-only.
 - A server-only, version-controlled daily recovery ledger preserves reviewed forecasts by Eastern match day and feeds the protected Supabase backfill when a primary prediction record is missing.
+- A validated June 11, 2026 FIFA ranking snapshot enriches public team cards and explanations. Provider-specific codes are canonicalized before ranking lookup.
 
 ## Aquarium Animation
 

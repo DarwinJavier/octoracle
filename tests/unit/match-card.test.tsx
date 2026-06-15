@@ -27,4 +27,11 @@ describe("MatchCard", () => {
       screen.getByRole("heading", { name: "Match in progress" }),
     ).toBeInTheDocument();
   });
+
+  it("shows the current FIFA ranking for each team", () => {
+    render(<MatchCard match={staticMatch} />);
+
+    expect(screen.getByText("FIFA rank #14")).toBeInTheDocument();
+    expect(screen.getByText("FIFA rank #60")).toBeInTheDocument();
+  });
 });

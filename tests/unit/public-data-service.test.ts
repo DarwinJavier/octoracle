@@ -124,4 +124,19 @@ describe("public featured-match service", () => {
     );
     expect(response.match?.teamB.flagAssetUrl).toBeNull();
   });
+
+  it("adds the current FIFA ranking snapshot to public teams", async () => {
+    const ranked = fixture("scheduled");
+    if (ranked.teamA) ranked.teamA.fifaCode = "BEL";
+    if (ranked.teamB) ranked.teamB.fifaCode = "EGY";
+
+    const response = await getFeaturedMatchResponse(
+      repository([ranked]),
+      now,
+      30,
+    );
+
+    expect(response.match?.teamA.fifaRank).toBe(9);
+    expect(response.match?.teamB.fifaRank).toBe(29);
+  });
 });

@@ -1,4 +1,5 @@
 import { resolveFeaturedMatch } from "@/lib/fixtures/resolver";
+import { fifaRankForCode } from "@/lib/fixtures/fifa-rankings";
 import type { NormalizedFixture, NormalizedTeam } from "@/lib/fixtures/types";
 import type { PublicDataRepository } from "@/lib/public-data/repository";
 import {
@@ -35,6 +36,7 @@ function publicTeam(
   return {
     id: team?.providerId ?? `placeholder-${side}`,
     fifaCode,
+    fifaRank: fifaRankForCode(fifaCode),
     flagAssetUrl,
     flagEmoji: emojiFor(fifaCode),
     name: team?.name ?? placeholder ?? `Team ${side} TBD`,

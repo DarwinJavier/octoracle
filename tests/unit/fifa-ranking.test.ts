@@ -7,6 +7,10 @@ import {
   parseFifaRankingResponse,
 } from "@/lib/prediction/signals/fifa-ranking";
 import { calculateHistorySignals } from "@/lib/prediction/signals/history";
+import {
+  FIFA_RANKING_SNAPSHOT_DATE,
+  fifaRankForCode,
+} from "@/lib/fixtures/fifa-rankings";
 
 const response = {
   Results: [
@@ -84,5 +88,12 @@ describe("FIFA ranking signals", () => {
     expect(fifaRankingCodeFor("URY")).toBe("URU");
     expect(fifaRankingCodeFor("KSA")).toBe("KSA");
     expect(fifaRankingCodeFor(null)).toBeNull();
+  });
+
+  it("keeps the supplied tournament ranking snapshot available to the UI", () => {
+    expect(FIFA_RANKING_SNAPSHOT_DATE).toBe("2026-06-11");
+    expect(fifaRankForCode("BEL")).toBe(9);
+    expect(fifaRankForCode("URY")).toBe(16);
+    expect(fifaRankForCode("TBD")).toBeNull();
   });
 });

@@ -339,6 +339,17 @@ a:focus-visible {
   letter-spacing: -0.05em;
 }
 
+.team-rank {
+  margin-top: 9px;
+  padding: 4px 9px;
+  border: 1px solid rgba(91, 231, 255, 0.28);
+  border-radius: 999px;
+  color: #d9f8ff;
+  font-size: 0.68rem;
+  font-weight: 800;
+  letter-spacing: 0.04em;
+}
+
 .team-side {
   margin-top: 5px;
   color: var(--muted);

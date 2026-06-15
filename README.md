@@ -13,6 +13,7 @@ A mobile-first World Cup entertainment and sports-analysis experience where a pl
 - **Results and accuracy:** Synchronizes completed results, records revisions, and compares frozen predictions with real outcomes.
 - **Automatic prediction recording:** Protected fixture sync publishes the earliest due predictions up to 48 hours before kickoff in bounded batches, refreshes eligible predictions every three hours, freezes due predictions, and backfills reviewed preview-ledger forecasts without overwriting stored history.
 - **Private daily recovery ledger:** Reviewed forecasts are grouped internally by Eastern match day so missing Supabase records can be restored without exposing the backup table to users.
+- **FIFA ranking context:** Match cards show the supplied June 11, 2026 men's ranking snapshot, and available ranking comparisons appear in prediction explanations.
 - **Secure research pipeline:** Fetches only server-controlled, allowlisted HTTPS sources and validates strict structured observations before they influence the model.
 - **Mobile and accessible UI:** Includes responsive layouts, semantic prediction text, keyboard activation, reduced motion, and animation skipping.
 - **Honest fallback states:** Clearly reports stale data, unavailable providers, unknown teams, in-progress matches, and predictions that are not ready.
