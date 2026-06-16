@@ -70,6 +70,8 @@ describe("football-data.org provider preview", () => {
         "537363",
         "537370",
         "537364",
+        "537391",
+        "537397",
       ]),
     );
   });
@@ -122,6 +124,23 @@ describe("football-data.org provider preview", () => {
       status: "frozen",
       version: 3,
     });
+  });
+
+  it("keeps June 16 reviewed forecasts in the private daily recovery table", () => {
+    expect(
+      recordedPreviewPredictionsForEasternDay("2026-06-16").map(
+        ({ matchProviderId, prediction }) => ({
+          matchProviderId,
+          score: `${prediction.predictedScoreA90}-${prediction.predictedScoreB90}`,
+          outcome: prediction.selectedOutcome,
+        }),
+      ),
+    ).toEqual(
+      expect.arrayContaining([
+        { matchProviderId: "537391", score: "2-0", outcome: "team_a" },
+        { matchProviderId: "537397", score: "2-0", outcome: "team_a" },
+      ]),
+    );
   });
 
   it("preserves the revealed Sweden one-nil prediction", () => {
