@@ -36,22 +36,30 @@ describe("reviewed prediction database backfill", () => {
     expect(JSON.parse(String(insert?.[1]?.body))).toEqual([
       expect.objectContaining({
         match_id: matchId,
-        predicted_score_a_90: 1,
-        predicted_score_b_90: 0,
-        selected_outcome: "team_a",
+        predicted_score_a_90: 2,
+        predicted_score_b_90: 2,
+        selected_outcome: "draw",
         status: "frozen",
+        version: 2,
       }),
     ]);
   });
 
-  it("does not overwrite a prediction already stored for the match", async () => {
+  it("does not rewrite the already stored reviewed version", async () => {
     const fetchImplementation = vi.fn(async (request: RequestInfo | URL) => {
       const url = String(request);
       if (url.includes("/matches?select=id,provider_id")) {
         return Response.json([{ id: matchId, provider_id: "537357" }]);
       }
       if (url.includes("/predictions?select=match_id")) {
-        return Response.json([{ match_id: matchId }]);
+        return Response.json([
+          {
+            match_id: matchId,
+            version: 2,
+            status: "frozen",
+            input_snapshot_hash: "reviewed-preview:537357:v2",
+          },
+        ]);
       }
       throw new Error(`Unexpected request: ${url}`);
     });
@@ -63,6 +71,64 @@ describe("reviewed prediction database backfill", () => {
 
     expect(await repository.backfillRecordedPredictions()).toBe(0);
     expect(fetchImplementation).toHaveBeenCalledTimes(2);
+  });
+
+  it("adds a corrected reviewed version and voids older frozen history", async () => {
+    const fetchImplementation = vi.fn(
+      async (request: RequestInfo | URL, init?: RequestInit) => {
+        const url = String(request);
+        if (url.includes("/matches?select=id,provider_id")) {
+          return Response.json([{ id: matchId, provider_id: "537357" }]);
+        }
+        if (url.includes("/predictions?select=match_id")) {
+          return Response.json([
+            {
+              match_id: matchId,
+              version: 1,
+              status: "frozen",
+              input_snapshot_hash: "reviewed-preview:537357:v1",
+            },
+          ]);
+        }
+        if (url.endsWith("/predictions") && init?.method === "POST") {
+          return new Response(null, { status: 201 });
+        }
+        if (
+          url.includes("/predictions?match_id=eq.") &&
+          init?.method === "PATCH"
+        ) {
+          return new Response(null, { status: 204 });
+        }
+        throw new Error(`Unexpected request: ${url}`);
+      },
+    );
+    const repository = new SupabaseFixtureRepository({
+      supabaseUrl: "https://supabase.test",
+      serviceRoleKey: "service-key",
+      fetchImplementation,
+    });
+
+    expect(await repository.backfillRecordedPredictions()).toBe(1);
+    const insert = fetchImplementation.mock.calls.find(
+      ([request, init]) =>
+        String(request).endsWith("/predictions") && init?.method === "POST",
+    );
+    expect(JSON.parse(String(insert?.[1]?.body))).toEqual([
+      expect.objectContaining({
+        match_id: matchId,
+        predicted_score_a_90: 2,
+        predicted_score_b_90: 2,
+        selected_outcome: "draw",
+        version: 2,
+      }),
+    ]);
+    const patch = fetchImplementation.mock.calls.find(
+      ([request, init]) =>
+        String(request).includes("status=eq.frozen") &&
+        init?.method === "PATCH",
+    );
+    expect(String(patch?.[0])).toContain("version=lt.2");
+    expect(JSON.parse(String(patch?.[1]?.body))).toEqual({ status: "void" });
   });
 });
 

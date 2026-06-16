@@ -86,11 +86,42 @@ describe("football-data.org provider preview", () => {
     ).toEqual(
       expect.arrayContaining([
         { matchProviderId: "537369", score: "3-0", outcome: "team_a" },
-        { matchProviderId: "537363", score: "2-1", outcome: "team_a" },
+        { matchProviderId: "537363", score: "0-0", outcome: "draw" },
         { matchProviderId: "537370", score: "0-2", outcome: "team_b" },
-        { matchProviderId: "537364", score: "2-0", outcome: "team_a" },
+        { matchProviderId: "537364", score: "1-1", outcome: "draw" },
       ]),
     );
+  });
+
+  it("preserves corrected predictions from the reviewed log", () => {
+    expect(recordedPreviewPredictionFor("537345")).toMatchObject({
+      predictedScoreA90: 2,
+      predictedScoreB90: 1,
+      selectedOutcome: "team_a",
+      status: "frozen",
+      version: 2,
+    });
+    expect(recordedPreviewPredictionFor("537357")).toMatchObject({
+      predictedScoreA90: 2,
+      predictedScoreB90: 2,
+      selectedOutcome: "draw",
+      status: "frozen",
+      version: 2,
+    });
+    expect(recordedPreviewPredictionFor("537363")).toMatchObject({
+      predictedScoreA90: 0,
+      predictedScoreB90: 0,
+      selectedOutcome: "draw",
+      status: "frozen",
+      version: 3,
+    });
+    expect(recordedPreviewPredictionFor("537364")).toMatchObject({
+      predictedScoreA90: 1,
+      predictedScoreB90: 1,
+      selectedOutcome: "draw",
+      status: "frozen",
+      version: 3,
+    });
   });
 
   it("preserves the revealed Sweden one-nil prediction", () => {

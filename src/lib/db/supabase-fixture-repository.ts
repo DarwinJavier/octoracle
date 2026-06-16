@@ -25,8 +25,15 @@ const jobRunSchema = z.array(
 const matchIdSchema = z.array(
   z.object({ id: z.string().uuid(), provider_id: z.string().min(1) }).strict(),
 );
-const predictionMatchIdSchema = z.array(
-  z.object({ match_id: z.string().uuid() }).strict(),
+const predictionSummarySchema = z.array(
+  z
+    .object({
+      match_id: z.string().uuid(),
+      version: z.number().int().positive(),
+      status: z.enum(["draft", "published", "frozen", "superseded", "void"]),
+      input_snapshot_hash: z.string().min(1),
+    })
+    .strict(),
 );
 
 type SupabaseFixtureRepositoryOptions = {
@@ -185,18 +192,58 @@ export class SupabaseFixtureRepository implements FixtureRepository {
     if (matches.length === 0) return 0;
 
     const matchFilter = matches.map(({ id }) => `"${id}"`).join(",");
-    const existing = predictionMatchIdSchema.parse(
+    const existing = predictionSummarySchema.parse(
       await (
         await this.request(
-          `predictions?select=match_id&match_id=in.(${encodeURIComponent(matchFilter)})`,
+          `predictions?select=match_id,version,status,input_snapshot_hash&match_id=in.(${encodeURIComponent(matchFilter)})`,
         )
       ).json(),
     );
-    const existingMatchIds = new Set(existing.map(({ match_id }) => match_id));
+    const existingByMatchId = new Map<string, typeof existing>();
+    for (const row of existing) {
+      const rows = existingByMatchId.get(row.match_id) ?? [];
+      rows.push(row);
+      existingByMatchId.set(row.match_id, rows);
+    }
+    const statusUpdates: Array<{
+      matchId: string;
+      beforeVersion: number;
+      fromStatus: "published" | "frozen";
+      toStatus: "superseded" | "void";
+    }> = [];
     const rows = matches.flatMap((match) => {
-      if (existingMatchIds.has(match.id)) return [];
       const prediction = recordedPreviewPredictionFor(match.provider_id);
       if (!prediction) return [];
+      const targetSnapshot = `reviewed-preview:${match.provider_id}:v${prediction.version}`;
+      const existingPredictions = existingByMatchId.get(match.id) ?? [];
+      if (
+        existingPredictions.some(
+          (item) => item.input_snapshot_hash === targetSnapshot,
+        )
+      ) {
+        return [];
+      }
+      const latestVersion = existingPredictions.reduce(
+        (max, item) => Math.max(max, item.version),
+        0,
+      );
+      if (latestVersion >= prediction.version) return [];
+      if (existingPredictions.some((item) => item.status === "published")) {
+        statusUpdates.push({
+          matchId: match.id,
+          beforeVersion: prediction.version,
+          fromStatus: "published",
+          toStatus: "superseded",
+        });
+      }
+      if (existingPredictions.some((item) => item.status === "frozen")) {
+        statusUpdates.push({
+          matchId: match.id,
+          beforeVersion: prediction.version,
+          fromStatus: "frozen",
+          toStatus: "void",
+        });
+      }
       const isFrozen = Date.now() >= Date.parse(prediction.freezeAt);
       return [
         {
@@ -224,7 +271,7 @@ export class SupabaseFixtureRepository implements FixtureRepository {
           animation_seed: prediction.animationSeed,
           model_version: "reviewed-preview-v1",
           algorithm_version: "reviewed-preview-v1",
-          input_snapshot_hash: `reviewed-preview:${match.provider_id}:v${prediction.version}`,
+          input_snapshot_hash: targetSnapshot,
         },
       ];
     });
@@ -235,6 +282,16 @@ export class SupabaseFixtureRepository implements FixtureRepository {
       headers: { Prefer: "return=minimal" },
       body: JSON.stringify(rows),
     });
+    for (const update of statusUpdates) {
+      await this.request(
+        `predictions?match_id=eq.${encodeURIComponent(update.matchId)}&status=eq.${update.fromStatus}&version=lt.${update.beforeVersion}`,
+        {
+          method: "PATCH",
+          headers: { Prefer: "return=minimal" },
+          body: JSON.stringify({ status: update.toStatus }),
+        },
+      );
+    }
     return rows.length;
   }
 
