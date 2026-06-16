@@ -299,7 +299,7 @@ const RECORDED_PREVIEW_PREDICTIONS = {
     status: "published",
     teamAWinProbability: 0.62,
     teamBWinProbability: 0.2,
-    version: 2,
+    version: 3,
   }),
   "537397": publicPredictionSchema.parse({
     animationSeed: "argentina-algeria-reviewed-v2",
@@ -319,7 +319,7 @@ const RECORDED_PREVIEW_PREDICTIONS = {
     status: "published",
     teamAWinProbability: 0.66,
     teamBWinProbability: 0.18,
-    version: 2,
+    version: 3,
   }),
 } as const;
 
