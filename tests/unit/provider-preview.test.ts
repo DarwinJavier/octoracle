@@ -80,6 +80,10 @@ describe("football-data.org provider preview", () => {
         "537335",
         "537336",
         "537330",
+        "537359",
+        "537353",
+        "537354",
+        "537360",
       ]),
     );
   });
@@ -187,6 +191,49 @@ describe("football-data.org provider preview", () => {
         { matchProviderId: "537330", score: "1-0", outcome: "team_a" },
       ]),
     );
+  });
+
+  it("keeps June 20 slate forecasts and app-ready explanations", () => {
+    expect(
+      recordedPreviewPredictionsForEasternDay("2026-06-20").map(
+        ({ matchProviderId, prediction }) => ({
+          matchProviderId,
+          score: `${prediction.predictedScoreA90}-${prediction.predictedScoreB90}`,
+          outcome: prediction.selectedOutcome,
+        }),
+      ),
+    ).toEqual(
+      expect.arrayContaining([
+        { matchProviderId: "537359", score: "2-1", outcome: "team_a" },
+        { matchProviderId: "537353", score: "2-1", outcome: "team_a" },
+        { matchProviderId: "537354", score: "2-0", outcome: "team_a" },
+      ]),
+    );
+
+    expect(recordedPreviewPredictionFor("537359")).toMatchObject({
+      confidence: "medium",
+      publicExplanation: expect.stringContaining(
+        "medium-confidence pick rather than a safe call",
+      ),
+      reasonCodes: expect.arrayContaining(["Opta via Al Jazeera"]),
+    });
+    expect(recordedPreviewPredictionFor("537353")).toMatchObject({
+      confidence: "medium",
+      publicExplanation: expect.stringContaining(
+        "medium-to-low-confidence pick",
+      ),
+    });
+    expect(recordedPreviewPredictionFor("537354")).toMatchObject({
+      confidence: "high",
+      publicExplanation: expect.stringContaining("86.1% win probability"),
+    });
+    expect(recordedPreviewPredictionFor("537360")).toMatchObject({
+      confidence: "high",
+      predictedScoreA90: 0,
+      predictedScoreB90: 2,
+      selectedOutcome: "team_b",
+      publicExplanation: expect.stringContaining("medium-high-confidence pick"),
+    });
   });
 
   it("preserves the revealed Sweden one-nil prediction", () => {
