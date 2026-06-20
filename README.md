@@ -74,7 +74,8 @@ Never give service-role, provider, model, or cron secrets a `NEXT_PUBLIC_` prefi
 2. Apply every SQL file in `supabase/migrations/` in filename order.
 3. Configure `SUPABASE_URL`, `SUPABASE_SERVICE_ROLE_KEY`, `FOOTBALL_DATA_API_KEY`, and `INTERNAL_CRON_SECRET`.
 4. Trigger fixture synchronization with `POST /api/internal/sync-fixtures`, an exact bearer secret, and an `Idempotency-Key` header. The protected sync also publishes or refreshes due predictions and freezes predictions at kickoff.
-5. Schedule the protected fixture, prediction, research, and result jobs as needed.
+5. Add `INTERNAL_CRON_SECRET` as a GitHub Actions repository secret. The scheduled sync workflow calls fixture/prediction and result synchronization every 15 minutes; both jobs are independent so a failure in one does not prevent the other.
+6. Configure any separate research-ingestion schedule only when approved sources are enabled; prediction and result persistence are already covered by the GitHub workflow.
 
 The service-role privilege migration is required when migrations are applied through the Supabase SQL Editor.
 

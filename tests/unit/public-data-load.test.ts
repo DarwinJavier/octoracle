@@ -39,11 +39,14 @@ function footballResponse(fixtures: unknown[]) {
 
 describe("public data loading fallbacks", () => {
   afterEach(() => {
+    vi.useRealTimers();
     vi.unstubAllEnvs();
     vi.unstubAllGlobals();
   });
 
   it("uses provider fixtures when configured Supabase storage is empty", async () => {
+    vi.useFakeTimers();
+    vi.setSystemTime(new Date("2026-06-20T18:00:00Z"));
     vi.stubEnv("SUPABASE_URL", "https://supabase.test");
     vi.stubEnv("SUPABASE_SERVICE_ROLE_KEY", "test-service-key");
     vi.stubEnv("FOOTBALL_DATA_API_KEY", "test-football-key");

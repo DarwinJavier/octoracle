@@ -193,6 +193,25 @@ describe("football-data.org provider preview", () => {
     );
   });
 
+  it("keeps June 19 reviewed forecasts in the private daily recovery table", () => {
+    expect(
+      recordedPreviewPredictionsForEasternDay("2026-06-19").map(
+        ({ matchProviderId, prediction }) => ({
+          matchProviderId,
+          score: `${prediction.predictedScoreA90}-${prediction.predictedScoreB90}`,
+          outcome: prediction.selectedOutcome,
+        }),
+      ),
+    ).toEqual(
+      expect.arrayContaining([
+        { matchProviderId: "537348", score: "1-0", outcome: "team_a" },
+        { matchProviderId: "537342", score: "0-1", outcome: "team_b" },
+        { matchProviderId: "537341", score: "2-0", outcome: "team_a" },
+        { matchProviderId: "537347", score: "1-0", outcome: "team_a" },
+      ]),
+    );
+  });
+
   it("keeps June 20 slate forecasts and app-ready explanations", () => {
     expect(
       recordedPreviewPredictionsForEasternDay("2026-06-20").map(

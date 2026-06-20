@@ -1,0 +1,40 @@
+name: Scheduled data sync
+
+on:
+  schedule:
+    - cron: "*/15 * * * *"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  sync-fixtures-and-predictions:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Sync fixtures and predictions
+        env:
+          INTERNAL_CRON_SECRET: ${{ secrets.INTERNAL_CRON_SECRET }}
+        run: |
+          curl --fail-with-body --silent --show-error \
+            --request POST \
+            --header "Authorization: Bearer ${INTERNAL_CRON_SECRET}" \
+            --header "Content-Type: application/json" \
+            --header "Idempotency-Key: github-fixtures-${GITHUB_RUN_ID}-${GITHUB_RUN_ATTEMPT}" \
+            --data '{}' \
+            https://octoracle.vercel.app/api/internal/sync-fixtures
+
+  sync-results:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Sync final results
+        env:
+          INTERNAL_CRON_SECRET: ${{ secrets.INTERNAL_CRON_SECRET }}
+        run: |
+          curl --fail-with-body --silent --show-error \
+            --request POST \
+            --header "Authorization: Bearer ${INTERNAL_CRON_SECRET}" \
+            --header "Content-Type: application/json" \
+            --header "Idempotency-Key: github-results-${GITHUB_RUN_ID}-${GITHUB_RUN_ATTEMPT}" \
+            --data '{}' \
+            https://octoracle.vercel.app/api/internal/sync-results
