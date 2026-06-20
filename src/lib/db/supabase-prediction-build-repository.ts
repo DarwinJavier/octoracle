@@ -19,7 +19,7 @@ const teamRowSchema = z.object({
 const matchRowsSchema = z.array(
   z.object({
     id: z.string().uuid(),
-    kickoff_at_utc: z.string().datetime(),
+    kickoff_at_utc: z.string().datetime({ offset: true }),
     stage: z.string().min(1),
     group_code: z.string().nullable(),
     status: z.literal("scheduled"),
@@ -34,8 +34,8 @@ const observationRowsSchema = z.array(
     source_domain: z.string().min(1),
     canonical_url: z.string().url(),
     title: z.string().min(1),
-    published_at: z.string().datetime().nullable(),
-    retrieved_at: z.string().datetime(),
+    published_at: z.string().datetime({ offset: true }).nullable(),
+    retrieved_at: z.string().datetime({ offset: true }),
     content_hash: z.string().min(1),
     lean: z.enum(["team_a", "draw", "team_b", "unclear"]),
     confidence: z.number().min(0).max(1),
@@ -55,7 +55,7 @@ const candidateMatchRowsSchema = z.array(
 const candidatePredictionRowsSchema = z.array(
   z.object({
     match_id: z.string().uuid(),
-    generated_at: z.string().datetime(),
+    generated_at: z.string().datetime({ offset: true }),
   }),
 );
 

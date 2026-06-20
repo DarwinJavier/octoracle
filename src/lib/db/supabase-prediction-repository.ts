@@ -10,8 +10,8 @@ const storedPredictionSchema = z
     match_id: z.string(),
     version: z.number().int().positive(),
     status: z.enum(["draft", "published", "frozen", "superseded", "void"]),
-    generated_at: z.string().datetime(),
-    frozen_at: z.string().datetime().nullable(),
+    generated_at: z.string().datetime({ offset: true }),
+    frozen_at: z.string().datetime({ offset: true }).nullable(),
   })
   .passthrough();
 

@@ -25,7 +25,7 @@ const rowSchema = z
       scoreAFinal: z.number().int(),
       scoreBFinal: z.number().int(),
       winnerTeamId: z.string().nullable(),
-      providerUpdatedAt: z.string().datetime(),
+      providerUpdatedAt: z.string().datetime({ offset: true }),
     }),
   })
   .strict();

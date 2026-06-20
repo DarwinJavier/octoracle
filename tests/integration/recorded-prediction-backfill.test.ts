@@ -154,7 +154,7 @@ describe("automatic prediction build candidates", () => {
           },
           {
             match_id: staleId,
-            generated_at: "2026-06-15T08:00:00.000Z",
+            generated_at: "2026-06-15T08:00:00+00:00",
           },
         ]);
       }
