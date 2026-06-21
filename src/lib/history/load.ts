@@ -32,7 +32,11 @@ export function demoHistory(): PredictionHistoryResponse {
   ]);
 }
 
-export async function loadPredictionHistory(limit = 20) {
+function applyLimit<T>(items: T[], limit?: number) {
+  return limit === undefined ? items : items.slice(0, limit);
+}
+
+export async function loadPredictionHistory(limit?: number) {
   const supabaseUrl = process.env.SUPABASE_URL;
   const serviceRoleKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
   const previewHistory = process.env.FOOTBALL_DATA_API_KEY
@@ -41,7 +45,7 @@ export async function loadPredictionHistory(limit = 20) {
       ).catch(() => [])
     : [];
   if (!supabaseUrl || !serviceRoleKey)
-    return buildHistoryResponse(previewHistory.slice(0, limit));
+    return buildHistoryResponse(applyLimit(previewHistory, limit));
   try {
     const stored = await new SupabaseHistoryRepository({
       supabaseUrl,
@@ -49,12 +53,15 @@ export async function loadPredictionHistory(limit = 20) {
     }).listHistory(limit);
     const storedIds = new Set(stored.map((item) => item.match.id));
     return buildHistoryResponse(
-      [
-        ...stored,
-        ...previewHistory.filter((item) => !storedIds.has(item.match.id)),
-      ].slice(0, limit),
+      applyLimit(
+        [
+          ...stored,
+          ...previewHistory.filter((item) => !storedIds.has(item.match.id)),
+        ],
+        limit,
+      ),
     );
   } catch {
-    return buildHistoryResponse(previewHistory.slice(0, limit));
+    return buildHistoryResponse(applyLimit(previewHistory, limit));
   }
 }

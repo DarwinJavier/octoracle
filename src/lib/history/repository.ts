@@ -1,5 +1,5 @@
 import type { PredictionHistoryItem } from "@/types/public";
 
 export type PredictionHistoryRepository = {
-  listHistory(limit: number): Promise<PredictionHistoryItem[]>;
+  listHistory(limit?: number): Promise<PredictionHistoryItem[]>;
 };

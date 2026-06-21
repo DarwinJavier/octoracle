@@ -23,5 +23,19 @@ describe("result history migrations", () => {
     expect(resultMigration).toContain("where not exists");
     expect(resultMigration).toContain("is not distinct from");
     expect(historyMigration).toContain("p.status = 'frozen'");
+
+    const unlimitedHistoryMigration = await readFile(
+      path.join(
+        process.cwd(),
+        "supabase/migrations/20260621120000_unlimited_prediction_history.sql",
+      ),
+      "utf8",
+    );
+    expect(unlimitedHistoryMigration).toContain(
+      "prediction_history(history_limit integer default null)",
+    );
+    expect(unlimitedHistoryMigration).toContain(
+      "when history_limit is null then null",
+    );
   });
 });

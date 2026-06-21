@@ -56,6 +56,8 @@ describe("football-data.org provider preview", () => {
   it("keeps every reviewed preview prediction in the immutable fallback ledger", () => {
     expect(recordedPreviewPredictionIds()).toEqual(
       expect.arrayContaining([
+        "537327",
+        "537328",
         "537333",
         "537345",
         "537334",
@@ -84,8 +86,44 @@ describe("football-data.org provider preview", () => {
         "537353",
         "537354",
         "537360",
+        "537392",
+        "537371",
+        "537365",
       ]),
     );
+  });
+
+  it("preserves the restored initial forecasts", () => {
+    expect(recordedPreviewPredictionFor("537327")).toMatchObject({
+      predictedScoreA90: 1,
+      predictedScoreB90: 0,
+      selectedOutcome: "team_a",
+      status: "frozen",
+    });
+    expect(recordedPreviewPredictionFor("537328")).toMatchObject({
+      predictedScoreA90: 1,
+      predictedScoreB90: 0,
+      selectedOutcome: "team_a",
+      status: "frozen",
+    });
+    expect(recordedPreviewPredictionFor("537392")).toMatchObject({
+      predictedScoreA90: 0,
+      predictedScoreB90: 1,
+      selectedOutcome: "team_b",
+      status: "frozen",
+    });
+    expect(recordedPreviewPredictionFor("537371")).toMatchObject({
+      predictedScoreA90: 3,
+      predictedScoreB90: 1,
+      selectedOutcome: "team_a",
+      status: "frozen",
+    });
+    expect(recordedPreviewPredictionFor("537365")).toMatchObject({
+      predictedScoreA90: 1,
+      predictedScoreB90: 1,
+      selectedOutcome: "draw",
+      status: "frozen",
+    });
   });
 
   it("keeps today's reviewed forecasts in a private daily recovery table", () => {

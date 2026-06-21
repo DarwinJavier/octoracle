@@ -45,13 +45,13 @@ export class SupabaseHistoryRepository implements PredictionHistoryRepository {
     this.restUrl = `${options.supabaseUrl.replace(/\/$/, "")}/rest/v1`;
   }
 
-  async listHistory(limit: number) {
+  async listHistory(limit?: number) {
     const response = await this.fetchImplementation(
       `${this.restUrl}/rpc/prediction_history`,
       {
         method: "POST",
         headers: createSupabaseServerHeaders(this.options.serviceRoleKey),
-        body: JSON.stringify({ history_limit: limit }),
+        body: JSON.stringify({ history_limit: limit ?? null }),
         cache: "no-store",
       },
     );

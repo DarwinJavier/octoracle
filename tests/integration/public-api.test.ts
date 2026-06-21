@@ -49,7 +49,7 @@ describe("read-only public APIs", () => {
 
   it("returns a validated immutable prediction history response", async () => {
     const response = await getHistory(
-      new Request("https://example.test/api/predictions/history?limit=20"),
+      new Request("https://example.test/api/predictions/history"),
     );
     expect(response.status).toBe(200);
     expect(await response.json()).toMatchObject({ items: [], total: 0 });

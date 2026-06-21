@@ -128,7 +128,7 @@ GET /api/health
 GET /api/matches/next
 GET /api/matches/:matchId
 GET /api/matches/:matchId/prediction
-GET /api/predictions/history?limit=20
+GET /api/predictions/history?limit=20 # limit is optional; omitted returns all history
 ```
 
 Protected internal endpoints:
