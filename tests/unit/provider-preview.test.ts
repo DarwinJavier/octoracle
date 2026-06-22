@@ -91,8 +91,50 @@ describe("football-data.org provider preview", () => {
         "537365",
         "537372",
         "537366",
+        "537399",
+        "537393",
+        "537394",
+        "537400",
       ]),
     );
+  });
+
+  it("keeps June 22 source-backed forecasts and UI criteria", () => {
+    expect(recordedPreviewPredictionFor("537399")).toMatchObject({
+      predictedScoreA90: 2,
+      predictedScoreB90: 1,
+      selectedOutcome: "team_a",
+      confidence: "high",
+      reasonCodes: expect.arrayContaining([
+        "Opta: Argentina 65.4%",
+        "Austria pressing and set pieces",
+      ]),
+    });
+    expect(recordedPreviewPredictionFor("537393")).toMatchObject({
+      predictedScoreA90: 3,
+      predictedScoreB90: 0,
+      selectedOutcome: "team_a",
+      confidence: "high",
+      reasonCodes: expect.arrayContaining(["Opta: France 88.8%"]),
+    });
+    expect(recordedPreviewPredictionFor("537394")).toMatchObject({
+      predictedScoreA90: 2,
+      predictedScoreB90: 1,
+      selectedOutcome: "team_a",
+      confidence: "low",
+      publicExplanation: expect.stringContaining("low-medium-confidence"),
+      reasonCodes: expect.arrayContaining(["Opta: Norway 44.7%"]),
+    });
+    expect(recordedPreviewPredictionFor("537400")).toMatchObject({
+      predictedScoreA90: 0,
+      predictedScoreB90: 2,
+      selectedOutcome: "team_b",
+      confidence: "high",
+      reasonCodes: expect.arrayContaining([
+        "Opta: Algeria 60.7%",
+        "Jordan compact and physical",
+      ]),
+    });
   });
 
   it("preserves the restored initial forecasts", () => {
