@@ -89,6 +89,8 @@ describe("football-data.org provider preview", () => {
         "537392",
         "537371",
         "537365",
+        "537372",
+        "537366",
       ]),
     );
   });
@@ -122,6 +124,18 @@ describe("football-data.org provider preview", () => {
       predictedScoreA90: 1,
       predictedScoreB90: 1,
       selectedOutcome: "draw",
+      status: "frozen",
+    });
+    expect(recordedPreviewPredictionFor("537372")).toMatchObject({
+      predictedScoreA90: 1,
+      predictedScoreB90: 0,
+      selectedOutcome: "team_a",
+      status: "frozen",
+    });
+    expect(recordedPreviewPredictionFor("537366")).toMatchObject({
+      predictedScoreA90: 0,
+      predictedScoreB90: 1,
+      selectedOutcome: "team_b",
       status: "frozen",
     });
   });
