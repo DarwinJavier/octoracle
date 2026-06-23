@@ -95,6 +95,10 @@ describe("football-data.org provider preview", () => {
         "537393",
         "537394",
         "537400",
+        "537405",
+        "537411",
+        "537412",
+        "537406",
       ]),
     );
   });
@@ -133,6 +137,50 @@ describe("football-data.org provider preview", () => {
       reasonCodes: expect.arrayContaining([
         "Opta: Algeria 60.7%",
         "Jordan compact and physical",
+      ]),
+    });
+  });
+
+  it("keeps June 23 source-backed forecasts and UI criteria", () => {
+    expect(recordedPreviewPredictionFor("537405")).toMatchObject({
+      predictedScoreA90: 2,
+      predictedScoreB90: 0,
+      selectedOutcome: "team_a",
+      confidence: "high",
+      reasonCodes: expect.arrayContaining([
+        "Opta: Portugal 78.0%",
+        "Uzbekistan 1.16 xG debut",
+      ]),
+    });
+    expect(recordedPreviewPredictionFor("537411")).toMatchObject({
+      predictedScoreA90: 3,
+      predictedScoreB90: 1,
+      selectedOutcome: "team_a",
+      confidence: "high",
+      reasonCodes: expect.arrayContaining([
+        "Opta: England 78.8%",
+        "Ghana counterattack threat",
+      ]),
+    });
+    expect(recordedPreviewPredictionFor("537412")).toMatchObject({
+      predictedScoreA90: 0,
+      predictedScoreB90: 2,
+      selectedOutcome: "team_b",
+      confidence: "high",
+      publicExplanation: expect.stringContaining("medium-high"),
+      reasonCodes: expect.arrayContaining([
+        "Opta: Croatia 63.0%",
+        "Croatia high-pressure bounce-back",
+      ]),
+    });
+    expect(recordedPreviewPredictionFor("537406")).toMatchObject({
+      predictedScoreA90: 2,
+      predictedScoreB90: 1,
+      selectedOutcome: "team_a",
+      confidence: "medium",
+      reasonCodes: expect.arrayContaining([
+        "Opta: Colombia 58.0%",
+        "Congo DR held Portugal",
       ]),
     });
   });
