@@ -99,6 +99,18 @@ describe("football-data.org provider preview", () => {
         "537411",
         "537412",
         "537406",
+        "537337",
+        "537338",
+        "537343",
+        "537344",
+        "537331",
+        "537332",
+        "537413",
+        "537414",
+        "537407",
+        "537408",
+        "537401",
+        "537402",
       ]),
     );
   });
@@ -181,6 +193,135 @@ describe("football-data.org provider preview", () => {
       reasonCodes: expect.arrayContaining([
         "Opta: Colombia 58.0%",
         "Congo DR held Portugal",
+      ]),
+    });
+  });
+
+  it("keeps June 24 source-backed forecasts and UI criteria", () => {
+    expect(recordedPreviewPredictionFor("537337")).toMatchObject({
+      predictedScoreA90: 2,
+      predictedScoreB90: 1,
+      selectedOutcome: "team_a",
+      confidence: "low",
+      publicExplanation: expect.stringContaining("low-medium"),
+      reasonCodes: expect.arrayContaining([
+        "Opta: Switzerland 43.5%",
+        "Canada 6-0 Qatar, David hat-trick",
+      ]),
+    });
+    expect(recordedPreviewPredictionFor("537338")).toMatchObject({
+      predictedScoreA90: 2,
+      predictedScoreB90: 1,
+      selectedOutcome: "team_a",
+      confidence: "high",
+      publicExplanation: expect.stringContaining("medium-high"),
+      reasonCodes: expect.arrayContaining([
+        "Opta: Bosnia 67.8%",
+        "Qatar conceded six, two reds",
+      ]),
+    });
+    expect(recordedPreviewPredictionFor("537343")).toMatchObject({
+      predictedScoreA90: 0,
+      predictedScoreB90: 2,
+      selectedOutcome: "team_b",
+      confidence: "high",
+      reasonCodes: expect.arrayContaining([
+        "Opta: Brazil 69.6%",
+        "Brazil beat Haiti 3-0",
+      ]),
+    });
+    expect(recordedPreviewPredictionFor("537344")).toMatchObject({
+      predictedScoreA90: 3,
+      predictedScoreB90: 0,
+      selectedOutcome: "team_a",
+      confidence: "high",
+      reasonCodes: expect.arrayContaining([
+        "Opta: Morocco 81.0%",
+        "Morocco unbeaten in Group C",
+      ]),
+    });
+    expect(recordedPreviewPredictionFor("537331")).toMatchObject({
+      predictedScoreA90: 0,
+      predictedScoreB90: 1,
+      selectedOutcome: "team_b",
+      confidence: "medium",
+      reasonCodes: expect.arrayContaining([
+        "Opta: Mexico 47.8%",
+        "Mexico rotation risk",
+      ]),
+    });
+    expect(recordedPreviewPredictionFor("537332")).toMatchObject({
+      predictedScoreA90: 1,
+      predictedScoreB90: 2,
+      selectedOutcome: "team_b",
+      confidence: "medium",
+      reasonCodes: expect.arrayContaining([
+        "Opta: South Korea 56.2%",
+        "Draw enough for South Korea",
+      ]),
+    });
+  });
+
+  it("keeps June 27 source-backed forecasts and UI criteria", () => {
+    expect(recordedPreviewPredictionFor("537413")).toMatchObject({
+      predictedScoreA90: 0,
+      predictedScoreB90: 2,
+      selectedOutcome: "team_b",
+      confidence: "high",
+      reasonCodes: expect.arrayContaining([
+        "Opta: England 81.0%",
+        "Panama eliminated, no goals",
+      ]),
+    });
+    expect(recordedPreviewPredictionFor("537414")).toMatchObject({
+      predictedScoreA90: 1,
+      predictedScoreB90: 0,
+      selectedOutcome: "team_a",
+      confidence: "medium",
+      reasonCodes: expect.arrayContaining([
+        "Opta: Croatia 56.3%",
+        "Ghana clean-sheet form",
+      ]),
+    });
+    expect(recordedPreviewPredictionFor("537407")).toMatchObject({
+      predictedScoreA90: 1,
+      predictedScoreB90: 2,
+      selectedOutcome: "team_b",
+      confidence: "medium",
+      publicExplanation: expect.stringContaining("low-medium"),
+      reasonCodes: expect.arrayContaining([
+        "Opta: Portugal 48.9%",
+        "Colombia two wins from two",
+      ]),
+    });
+    expect(recordedPreviewPredictionFor("537408")).toMatchObject({
+      predictedScoreA90: 1,
+      predictedScoreB90: 0,
+      selectedOutcome: "team_a",
+      confidence: "medium",
+      reasonCodes: expect.arrayContaining([
+        "Opta: Congo DR 48.9%",
+        "Uzbekistan need large-margin win",
+      ]),
+    });
+    expect(recordedPreviewPredictionFor("537401")).toMatchObject({
+      predictedScoreA90: 0,
+      predictedScoreB90: 2,
+      selectedOutcome: "team_b",
+      confidence: "high",
+      reasonCodes: expect.arrayContaining([
+        "Jordan upset chance 8.7%",
+        "Argentina rotation caveat",
+      ]),
+    });
+    expect(recordedPreviewPredictionFor("537402")).toMatchObject({
+      predictedScoreA90: 1,
+      predictedScoreB90: 1,
+      selectedOutcome: "draw",
+      confidence: "medium",
+      reasonCodes: expect.arrayContaining([
+        "Opta: draw 42.1%",
+        "Austria need one point",
       ]),
     });
   });
