@@ -66,6 +66,9 @@ export function AccuracyHistory({
                     item.result.scoreBFinal !== item.result.scoreB90
                       ? ` Final resolution ${item.result.scoreAFinal}–${item.result.scoreBFinal}.`
                       : ""}
+                    {item.accuracy.advancingTeamCorrect !== null
+                      ? ` Advance pick ${item.accuracy.advancingTeamCorrect ? "correct" : "incorrect"}.`
+                      : ""}
                   </p>
                 </article>
               ))}

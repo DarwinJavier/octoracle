@@ -111,6 +111,13 @@ describe("football-data.org provider preview", () => {
         "537408",
         "537401",
         "537402",
+        "537417",
+        "537423",
+        "537415",
+        "537418",
+        "537424",
+        "537416",
+        "537425",
       ]),
     );
   });
@@ -323,6 +330,60 @@ describe("football-data.org provider preview", () => {
         "Opta: draw 42.1%",
         "Austria need one point",
       ]),
+    });
+  });
+
+  it("keeps restored Round of 32 forecasts with advancement picks", () => {
+    expect(recordedPreviewPredictionFor("537417")).toMatchObject({
+      predictedScoreA90: 0,
+      predictedScoreB90: 1,
+      predictedAdvancingTeamId: "828",
+      selectedOutcome: "team_b",
+      confidence: "medium",
+      status: "frozen",
+    });
+    expect(recordedPreviewPredictionFor("537423")).toMatchObject({
+      predictedScoreA90: 2,
+      predictedScoreB90: 1,
+      predictedAdvancingTeamId: "764",
+      selectedOutcome: "team_a",
+      confidence: "high",
+    });
+    expect(recordedPreviewPredictionFor("537415")).toMatchObject({
+      predictedScoreA90: 2,
+      predictedScoreB90: 0,
+      predictedAdvancingTeamId: "759",
+      selectedOutcome: "team_a",
+      confidence: "high",
+    });
+    expect(recordedPreviewPredictionFor("537418")).toMatchObject({
+      predictedScoreA90: 1,
+      predictedScoreB90: 1,
+      predictedAdvancingTeamId: "8601",
+      selectedOutcome: "draw",
+      confidence: "low",
+      publicExplanation: expect.stringContaining("advance on penalties"),
+    });
+    expect(recordedPreviewPredictionFor("537424")).toMatchObject({
+      predictedScoreA90: 1,
+      predictedScoreB90: 2,
+      predictedAdvancingTeamId: "8872",
+      selectedOutcome: "team_b",
+      confidence: "medium",
+    });
+    expect(recordedPreviewPredictionFor("537416")).toMatchObject({
+      predictedScoreA90: 2,
+      predictedScoreB90: 0,
+      predictedAdvancingTeamId: "773",
+      selectedOutcome: "team_a",
+      confidence: "high",
+    });
+    expect(recordedPreviewPredictionFor("537425")).toMatchObject({
+      predictedScoreA90: 2,
+      predictedScoreB90: 1,
+      predictedAdvancingTeamId: "769",
+      selectedOutcome: "team_a",
+      confidence: "medium",
     });
   });
 

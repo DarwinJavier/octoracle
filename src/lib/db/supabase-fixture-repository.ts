@@ -23,7 +23,20 @@ const jobRunSchema = z.array(
     .passthrough(),
 );
 const matchIdSchema = z.array(
-  z.object({ id: z.string().uuid(), provider_id: z.string().min(1) }).strict(),
+  z
+    .object({
+      id: z.string().uuid(),
+      provider_id: z.string().min(1),
+      team_a: z
+        .object({ id: z.string().uuid(), provider_id: z.string().min(1) })
+        .nullable()
+        .optional(),
+      team_b: z
+        .object({ id: z.string().uuid(), provider_id: z.string().min(1) })
+        .nullable()
+        .optional(),
+    })
+    .strict(),
 );
 const predictionSummarySchema = z.array(
   z
@@ -185,7 +198,7 @@ export class SupabaseFixtureRepository implements FixtureRepository {
     const matches = matchIdSchema.parse(
       await (
         await this.request(
-          `matches?select=id,provider_id&provider_id=in.(${encodeURIComponent(providerFilter)})`,
+          `matches?select=id,provider_id,team_a:teams!matches_team_a_id_fkey(id,provider_id),team_b:teams!matches_team_b_id_fkey(id,provider_id)&provider_id=in.(${encodeURIComponent(providerFilter)})`,
         )
       ).json(),
     );
@@ -214,6 +227,19 @@ export class SupabaseFixtureRepository implements FixtureRepository {
     const rows = matches.flatMap((match) => {
       const prediction = recordedPreviewPredictionFor(match.provider_id);
       if (!prediction) return [];
+      const predictedAdvancingTeamId =
+        prediction.predictedAdvancingTeamId === null
+          ? null
+          : prediction.predictedAdvancingTeamId === match.team_a?.provider_id
+            ? match.team_a.id
+            : prediction.predictedAdvancingTeamId === match.team_b?.provider_id
+              ? match.team_b.id
+              : undefined;
+      if (predictedAdvancingTeamId === undefined) {
+        throw new Error(
+          `recorded_prediction_invalid_advancing_team_${match.provider_id}`,
+        );
+      }
       const targetSnapshot = `reviewed-preview:${match.provider_id}:v${prediction.version}`;
       const existingPredictions = existingByMatchId.get(match.id) ?? [];
       if (
@@ -257,7 +283,7 @@ export class SupabaseFixtureRepository implements FixtureRepository {
           expected_goals_b: prediction.predictedScoreB90,
           predicted_score_a_90: prediction.predictedScoreA90,
           predicted_score_b_90: prediction.predictedScoreB90,
-          predicted_advancing_team_id: null,
+          predicted_advancing_team_id: predictedAdvancingTeamId,
           selected_outcome: prediction.selectedOutcome,
           confidence: prediction.confidence,
           reason_codes: prediction.reasonCodes,

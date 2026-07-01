@@ -130,6 +130,53 @@ describe("reviewed prediction database backfill", () => {
     expect(String(patch?.[0])).toContain("version=lt.2");
     expect(JSON.parse(String(patch?.[1]?.body))).toEqual({ status: "void" });
   });
+
+  it("maps a restored knockout advancement pick onto the internal team id", async () => {
+    const teamAId = "00000000-0000-4000-8000-0000000000aa";
+    const teamBId = "00000000-0000-4000-8000-0000000000bb";
+    const fetchImplementation = vi.fn(
+      async (request: RequestInfo | URL, init?: RequestInit) => {
+        const url = String(request);
+        if (url.includes("/matches?select=id,provider_id")) {
+          return Response.json([
+            {
+              id: matchId,
+              provider_id: "537418",
+              team_a: { id: teamAId, provider_id: "8601" },
+              team_b: { id: teamBId, provider_id: "815" },
+            },
+          ]);
+        }
+        if (url.includes("/predictions?select=match_id")) {
+          return Response.json([]);
+        }
+        if (url.endsWith("/predictions") && init?.method === "POST") {
+          return new Response(null, { status: 201 });
+        }
+        throw new Error(`Unexpected request: ${url}`);
+      },
+    );
+    const repository = new SupabaseFixtureRepository({
+      supabaseUrl: "https://supabase.test",
+      serviceRoleKey: "service-key",
+      fetchImplementation,
+    });
+
+    expect(await repository.backfillRecordedPredictions()).toBe(1);
+    const insert = fetchImplementation.mock.calls.find(
+      ([request, init]) =>
+        String(request).endsWith("/predictions") && init?.method === "POST",
+    );
+    expect(JSON.parse(String(insert?.[1]?.body))).toEqual([
+      expect.objectContaining({
+        match_id: matchId,
+        predicted_score_a_90: 1,
+        predicted_score_b_90: 1,
+        predicted_advancing_team_id: teamAId,
+        selected_outcome: "draw",
+      }),
+    ]);
+  });
 });
 
 describe("automatic prediction build candidates", () => {
