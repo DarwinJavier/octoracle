@@ -60,7 +60,7 @@ describe("deterministic baseline prediction engine", () => {
     );
   });
 
-  it("stores a separate advancing team for a knockout 90-minute draw", () => {
+  it("selects a final winner for knockout matches instead of a draw", () => {
     const input = predictionInput({
       stageType: "knockout",
       teamB: {
@@ -72,6 +72,9 @@ describe("deterministic baseline prediction engine", () => {
     expect(prediction.selectedOutcome).toBe("team_a");
     expect(prediction.predictedAdvancingTeamId).toBe(
       "00000000-0000-4000-8000-00000000000a",
+    );
+    expect(prediction.predictedScoreA90).toBeGreaterThan(
+      prediction.predictedScoreB90,
     );
   });
 

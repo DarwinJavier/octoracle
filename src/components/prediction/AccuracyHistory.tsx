@@ -53,8 +53,8 @@ export function AccuracyHistory({
                   className="prediction-explanation"
                 >
                   <h3>
-                    {item.match.teamA.shortName} {item.result.scoreA90}–
-                    {item.result.scoreB90} {item.match.teamB.shortName}
+                    {item.match.teamA.shortName} {item.result.scoreAFinal}–
+                    {item.result.scoreBFinal} {item.match.teamB.shortName}
                   </h3>
                   <p>
                     Predicted {item.prediction.predictedScoreA90}–
@@ -64,7 +64,7 @@ export function AccuracyHistory({
                     {item.accuracy.exactScoreCorrect ? "correct" : "incorrect"}.
                     {item.result.scoreAFinal !== item.result.scoreA90 ||
                     item.result.scoreBFinal !== item.result.scoreB90
-                      ? ` Final resolution ${item.result.scoreAFinal}–${item.result.scoreBFinal}.`
+                      ? ` 90-minute score was ${item.result.scoreA90}–${item.result.scoreB90}.`
                       : ""}
                     {item.accuracy.advancingTeamCorrect !== null
                       ? ` Advance pick ${item.accuracy.advancingTeamCorrect ? "correct" : "incorrect"}.`

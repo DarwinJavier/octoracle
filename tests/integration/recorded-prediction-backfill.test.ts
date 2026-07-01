@@ -171,9 +171,10 @@ describe("reviewed prediction database backfill", () => {
       expect.objectContaining({
         match_id: matchId,
         predicted_score_a_90: 1,
-        predicted_score_b_90: 1,
-        predicted_advancing_team_id: teamAId,
-        selected_outcome: "draw",
+        predicted_score_b_90: 2,
+        predicted_advancing_team_id: teamBId,
+        selected_outcome: "team_b",
+        version: 2,
       }),
     ]);
   });

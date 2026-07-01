@@ -58,7 +58,7 @@ describe("result resolution and accuracy", () => {
     ).toThrow("invalid_winner");
   });
 
-  it("scores the exact frozen 90-minute prediction", () => {
+  it("scores the exact frozen final-result prediction", () => {
     const result = finalResultFromFixture(finishedFixture())!;
     expect(
       calculatePredictionAccuracy(staticPrediction, result, "a", "b"),
@@ -69,7 +69,7 @@ describe("result resolution and accuracy", () => {
     });
   });
 
-  it("scores knockout advancement separately from a 90-minute draw", () => {
+  it("scores knockout final results using the penalty resolution", () => {
     const result = finalResultFromFixture(
       finishedFixture({
         status: "finished_after_penalties",
@@ -77,6 +77,37 @@ describe("result resolution and accuracy", () => {
         scoreB90: 1,
         scoreAFinal: 5,
         scoreBFinal: 4,
+      }),
+    )!;
+    expect(
+      calculatePredictionAccuracy(
+        {
+          ...staticPrediction,
+          selectedOutcome: "team_a",
+          predictedScoreA90: 5,
+          predictedScoreB90: 4,
+          predictedAdvancingTeamId: "a",
+        },
+        result,
+        "a",
+        "b",
+      ),
+    ).toEqual({
+      outcomeCorrect: true,
+      exactScoreCorrect: true,
+      advancingTeamCorrect: true,
+    });
+  });
+
+  it("does not treat a knockout 90-minute draw as the final outcome", () => {
+    const result = finalResultFromFixture(
+      finishedFixture({
+        status: "finished_after_penalties",
+        scoreA90: 1,
+        scoreB90: 1,
+        scoreAFinal: 2,
+        scoreBFinal: 3,
+        winnerProviderTeamId: "b",
       }),
     )!;
     expect(
@@ -93,9 +124,9 @@ describe("result resolution and accuracy", () => {
         "b",
       ),
     ).toEqual({
-      outcomeCorrect: true,
-      exactScoreCorrect: true,
-      advancingTeamCorrect: true,
+      outcomeCorrect: false,
+      exactScoreCorrect: false,
+      advancingTeamCorrect: false,
     });
   });
 });

@@ -71,8 +71,13 @@ function outcomeProbabilities(expectedA: number, expectedB: number) {
   ];
 }
 
-function selectOutcome(probabilities: number[]): SelectedOutcome {
+function selectOutcome(
+  probabilities: number[],
+  stageType: PredictionInput["stageType"],
+  advantage: number,
+): SelectedOutcome {
   const [teamA, draw, teamB] = probabilities;
+  if (stageType === "knockout") return advantage >= 0 ? "team_a" : "team_b";
   if (Math.abs(teamA - teamB) <= 0.00001 && draw >= 0.2) return "draw";
   return teamA > teamB ? "team_a" : "team_b";
 }
@@ -169,7 +174,11 @@ export function buildPrediction(rawInput: PredictionInput): BuiltPrediction {
   );
   const probabilities = outcomeProbabilities(expectedGoalsA, expectedGoalsB);
   probabilities[2] = round(1 - probabilities[0] - probabilities[1]);
-  const selectedOutcome = selectOutcome(probabilities);
+  const selectedOutcome = selectOutcome(
+    probabilities,
+    input.stageType,
+    advantage,
+  );
   const score = mostLikelyScore(
     expectedGoalsA,
     expectedGoalsB,
@@ -189,7 +198,7 @@ export function buildPrediction(rawInput: PredictionInput): BuiltPrediction {
     predictedScoreB90: score.teamB,
     predictedAdvancingTeamId:
       input.stageType === "knockout"
-        ? advantage >= 0
+        ? selectedOutcome === "team_a"
           ? input.teamAId
           : input.teamBId
         : null,

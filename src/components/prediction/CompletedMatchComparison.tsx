@@ -24,7 +24,11 @@ export function CompletedMatchComparison({
           scoreB90: result.scoreB90,
           scoreAFinal: result.scoreAFinal,
           scoreBFinal: result.scoreBFinal,
-          status: "finished",
+          status:
+            result.scoreAFinal === result.scoreA90 &&
+            result.scoreBFinal === result.scoreB90
+              ? "finished"
+              : "finished_after_penalties",
           winnerProviderTeamId: result.winnerTeamId,
         },
         match.teamA.id,
@@ -47,10 +51,15 @@ export function CompletedMatchComparison({
         <article className="prediction-result">
           <p>Real result</p>
           <h3>
-            {match.teamA.shortName} {result.scoreA90}–{result.scoreB90}{" "}
+            {match.teamA.shortName} {result.scoreAFinal}–{result.scoreBFinal}{" "}
             {match.teamB.shortName}
           </h3>
-          <strong>Final after 90 minutes</strong>
+          <strong>
+            {result.scoreAFinal === result.scoreA90 &&
+            result.scoreBFinal === result.scoreB90
+              ? "Final result"
+              : `Final result; 90-minute score was ${result.scoreA90}–${result.scoreB90}`}
+          </strong>
         </article>
         <article className="prediction-result">
           <p>Recorded prediction</p>

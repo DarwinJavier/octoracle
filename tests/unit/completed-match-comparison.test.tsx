@@ -24,4 +24,29 @@ describe("CompletedMatchComparison", () => {
     expect(screen.getByText("Recorded prediction")).toBeInTheDocument();
     expect(screen.getByText("Exact score correct")).toBeInTheDocument();
   });
+
+  it("uses the final resolved score for penalty shootout comparisons", () => {
+    render(
+      <CompletedMatchComparison
+        match={staticMatch}
+        prediction={{
+          ...staticPrediction,
+          predictedScoreA90: 3,
+          predictedScoreB90: 4,
+          selectedOutcome: "team_b",
+          predictedAdvancingTeamId: staticMatch.teamB.id,
+        }}
+        result={{
+          scoreA90: 1,
+          scoreB90: 1,
+          scoreAFinal: 3,
+          scoreBFinal: 4,
+          winnerTeamId: staticMatch.teamB.id,
+        }}
+      />,
+    );
+
+    expect(screen.getByText(/Final result; 90-minute score was 1/)).toBeInTheDocument();
+    expect(screen.getByText("Exact score correct")).toBeInTheDocument();
+  });
 });

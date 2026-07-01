@@ -358,11 +358,12 @@ describe("football-data.org provider preview", () => {
     });
     expect(recordedPreviewPredictionFor("537418")).toMatchObject({
       predictedScoreA90: 1,
-      predictedScoreB90: 1,
-      predictedAdvancingTeamId: "8601",
-      selectedOutcome: "draw",
+      predictedScoreB90: 2,
+      predictedAdvancingTeamId: "815",
+      selectedOutcome: "team_b",
       confidence: "low",
-      publicExplanation: expect.stringContaining("advance on penalties"),
+      publicExplanation: expect.stringContaining("final-result policy"),
+      version: 2,
     });
     expect(recordedPreviewPredictionFor("537424")).toMatchObject({
       predictedScoreA90: 1,

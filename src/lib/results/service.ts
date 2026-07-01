@@ -79,13 +79,12 @@ export function calculatePredictionAccuracy(
     prediction.predictedAdvancingTeamId === null
       ? null
       : prediction.predictedAdvancingTeamId === result.winnerProviderTeamId;
+  const finalOutcome = scoreOutcome(result.scoreAFinal, result.scoreBFinal);
   return accuracyResultSchema.parse({
-    outcomeCorrect:
-      prediction.selectedOutcome ===
-      scoreOutcome(result.scoreA90, result.scoreB90),
+    outcomeCorrect: prediction.selectedOutcome === finalOutcome,
     exactScoreCorrect:
-      prediction.predictedScoreA90 === result.scoreA90 &&
-      prediction.predictedScoreB90 === result.scoreB90,
+      prediction.predictedScoreA90 === result.scoreAFinal &&
+      prediction.predictedScoreB90 === result.scoreBFinal,
     advancingTeamCorrect:
       advancingTeamCorrect === null
         ? null
